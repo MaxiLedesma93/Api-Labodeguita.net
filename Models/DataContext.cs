@@ -14,5 +14,7 @@ namespace Api_Labodeguita.net.Models
         }
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Producto> Productos { get; set; }
+        public DbSet<Detalle> Detalles { get; set; }
+        public DbSet<Pedido> Pedidos { get; set; }
     }
 }
