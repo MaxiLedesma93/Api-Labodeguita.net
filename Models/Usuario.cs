@@ -24,5 +24,6 @@ namespace Api_Labodeguita.net.Models{
         public string Telefono { get; set; }
 
         public bool Estado { get; set; }
+        public string Clave { get; set; }
    }
 }

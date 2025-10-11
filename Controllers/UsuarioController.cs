@@ -1,6 +1,8 @@
 using Api_Labodeguita.net.Models;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,18 +19,23 @@ namespace Api_Labodeguita.net.Controllers
     {
          private readonly DataContext contexto;
 
-         public UsuariosController(DataContext context)
+        public IConfiguration config { get; }
+        public IWebHostEnvironment environment { get; }
+
+        public UsuariosController(DataContext context, IConfiguration config,IWebHostEnvironment environment)
          {
-             contexto = context;
+            this.contexto = context;
+            this.config = config;
+            this.environment = environment;
          }
-         
-         //localhost/usuarios/1
-         //localhost/usuarios/${id}
+
+        //localhost/usuarios/1
+        //localhost/usuarios/${id}
         [HttpGet("{id}")]
         public async Task<ActionResult> GetUsuario(int id)
         {
-            
-             try
+
+            try
             {
 
 
@@ -37,15 +44,45 @@ namespace Api_Labodeguita.net.Controllers
 
                 return usuario != null ? Ok(usuario) : NotFound();
             }
-          
 
-            
+
+
             catch (Exception ex)
             {
                 return BadRequest(ex.Message.ToString());
 
             }
         }
+
+        [HttpPost]
+         public async Task<IActionResult> Nuevo([FromForm] Usuario usuario){
+            try{
+                if(ModelState.IsValid){
+
+                     
+                     usuario.Clave = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+							password: usuario.Clave,
+							salt: System.Text.Encoding.ASCII.GetBytes(config["Salt"]),
+							prf: KeyDerivationPrf.HMACSHA1,
+							iterationCount: 1000,
+							numBytesRequested: 256 / 8));
+                    contexto.Usuarios.Add(usuario);
+                    await contexto.SaveChangesAsync();
+                    return CreatedAtAction(nameof(GetUsuario), new { id = usuario.Id }, usuario);
+                  
+
+                }
+                return BadRequest();
+               
+                 
+
+            }catch(Exception ex){
+                 return BadRequest(ex.InnerException?.Message ?? ex.Message);
+                
+            }
+
+        }
+
 
            
     }
