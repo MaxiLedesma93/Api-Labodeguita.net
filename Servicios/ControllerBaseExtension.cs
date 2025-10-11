@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
-namespace ApiInmobiliaria.Servicios
+namespace Api_Labodeguita.net.Servicios
 {
 	public static class ControllerBaseExtensions
 	{

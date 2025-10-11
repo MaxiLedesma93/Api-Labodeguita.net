@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 
-namespace ApiInmobiliaria.Models{
+namespace Api_Labodeguita.net.Models{
 
     public class Producto
    {
@@ -15,6 +15,8 @@ namespace ApiInmobiliaria.Models{
 
         [Required]
         public double Precio { get; set; }
+
+        public bool Estado { get; set; }
 
    }
 }

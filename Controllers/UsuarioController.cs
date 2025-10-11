@@ -1,5 +1,10 @@
-using ApiInmobiliaria.Models;
+using Api_Labodeguita.net.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 
 
 namespace Api_Labodeguita.net.Controllers
@@ -10,13 +15,13 @@ namespace Api_Labodeguita.net.Controllers
     //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class UsuariosController : ControllerBase
     {
-        /* private readonly DataContext contexto;
+         private readonly DataContext contexto;
 
-         public ContratosController(DataContext context)
+         public UsuariosController(DataContext context)
          {
              contexto = context;
          }
-         */
+         
          //localhost/usuarios/1
          //localhost/usuarios/${id}
         [HttpGet("{id}")]
@@ -27,12 +32,7 @@ namespace Api_Labodeguita.net.Controllers
             {
 
 
-                var usuario = new Usuario
-                {
-                    Id = 1,
-                    Nombre = "Carlos Alberto",
-                    Telefono = "2664935541"
-                };
+                var usuario = await contexto.Usuarios.SingleOrDefaultAsync(x => x.Id == id);
 
 
                 return usuario != null ? Ok(usuario) : NotFound();
