@@ -53,7 +53,7 @@ namespace Api_Labodeguita.net.Controllers
 
             }
         }
-
+        //localhost:5000/usuarios/nuevo
         [HttpPost("Nuevo")]
          public async Task<IActionResult> Nuevo([FromForm] Usuario usuario){
             try{
