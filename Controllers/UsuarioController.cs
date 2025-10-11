@@ -54,23 +54,23 @@ namespace Api_Labodeguita.net.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPost("Nuevo")]
          public async Task<IActionResult> Nuevo([FromForm] Usuario usuario){
             try{
+                
                 if(ModelState.IsValid){
 
-                     
-                     usuario.Clave = Convert.ToBase64String(KeyDerivation.Pbkdf2(
-							password: usuario.Clave,
-							salt: System.Text.Encoding.ASCII.GetBytes(config["Salt"]),
-							prf: KeyDerivationPrf.HMACSHA1,
-							iterationCount: 1000,
-							numBytesRequested: 256 / 8));
+
+                    usuario.Clave = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+                           password: usuario.Clave,
+                           salt: System.Text.Encoding.ASCII.GetBytes(config["Salt"]),
+                           prf: KeyDerivationPrf.HMACSHA1,
+                           iterationCount: 1000,
+                           numBytesRequested: 256 / 8));
+                    usuario.Estado = true;
                     contexto.Usuarios.Add(usuario);
                     await contexto.SaveChangesAsync();
                     return CreatedAtAction(nameof(GetUsuario), new { id = usuario.Id }, usuario);
-                  
-
                 }
                 return BadRequest();
                
