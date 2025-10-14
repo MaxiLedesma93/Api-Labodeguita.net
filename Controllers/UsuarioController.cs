@@ -53,34 +53,65 @@ namespace Api_Labodeguita.net.Controllers
 
             }
         }
+
         //localhost:5000/usuarios/nuevo
         [HttpPost("Nuevo")]
-         public async Task<IActionResult> Nuevo([FromForm] Usuario usuario){
-            try{
-                
-                if(ModelState.IsValid){
+        public async Task<IActionResult> Nuevo([FromForm] Usuario usuario)
+        {
+            try
+            {
 
-
+                if (ModelState.IsValid)
+                {
+                    var usuarioExistente = await contexto.Usuarios.AsNoTracking()
+                        .FirstOrDefaultAsync(x => x.Email == usuario.Email);
+                    if(usuarioExistente == null)
+                    {
                     usuario.Clave = Convert.ToBase64String(KeyDerivation.Pbkdf2(
-                           password: usuario.Clave,
-                           salt: System.Text.Encoding.ASCII.GetBytes(config["Salt"]),
-                           prf: KeyDerivationPrf.HMACSHA1,
-                           iterationCount: 1000,
-                           numBytesRequested: 256 / 8));
+                        password: usuario.Clave,
+                        salt: System.Text.Encoding.ASCII.GetBytes(config["Salt"]),
+                        prf: KeyDerivationPrf.HMACSHA1,
+                        iterationCount: 1000,
+                        numBytesRequested: 256 / 8));
                     usuario.Estado = true;
                     contexto.Usuarios.Add(usuario);
                     await contexto.SaveChangesAsync();
                     return CreatedAtAction(nameof(GetUsuario), new { id = usuario.Id }, usuario);
+                    }
                 }
                 return BadRequest();
-               
-                 
 
-            }catch(Exception ex){
-                 return BadRequest(ex.InnerException?.Message ?? ex.Message);
-                
+
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.InnerException?.Message ?? ex.Message);
+
             }
 
+        }
+
+        //localhost:5000/usuarios/editar
+        [HttpPost("Editar")]
+        public async Task<IActionResult> Editar([FromForm] Usuario usuario)
+        {
+            try
+            {
+
+
+                if (ModelState.IsValid)
+                {
+                    contexto.Usuarios.Update(usuario);
+                    await contexto.SaveChangesAsync();
+                    return Ok(usuario);
+                }
+                return BadRequest();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message.ToString());
+            }
         }
 
 
