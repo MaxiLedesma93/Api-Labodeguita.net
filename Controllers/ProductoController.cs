@@ -11,14 +11,14 @@ namespace Api_Labodeguita.net.Controllers
     [Route("[controller]")]
     //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 
-    public class PedidoController : ControllerBase
+    public class ProductoController : ControllerBase
     {
-        #region Propiedades
+         #region Propiedades
         private readonly DataContext contexto;
         public IConfiguration config { get; }
         public IWebHostEnvironment environment { get; }
 
-        public PedidoController(DataContext context, IConfiguration config,IWebHostEnvironment environment)
+        public ProductoController(DataContext context, IConfiguration config, IWebHostEnvironment environment)
         {
             this.contexto = context;
             this.config = config;
@@ -28,24 +28,33 @@ namespace Api_Labodeguita.net.Controllers
 
         #region EndPoints
         [HttpGet("{id}")]
-        //localhost/detalle/${id}
-        public async Task<ActionResult> GetPedido(int id)
+        //localhost/producto/${id}
+        //obtiene un producto por id
+        public async Task<ActionResult> GetProducto(int id)
         {
             try
             {
-                var cliente = User.Identity.Name;
-                var pedidos = await contexto.Pedido
-                                .Include(x => x.Cliente)
-                                .Include(x => x.Detalle)
-                                .Where(x => x.Cliente.Email == cliente)
-                                .SingleOrDefaultAsync(x => x.Id == id);
-
-                return pedidos != null ? Ok(pedidos) : NotFound();
+                var producto = await contexto.Producto.SingleOrDefaultAsync(x => x.Id == id);
+                return producto != null ? Ok(producto) : NotFound();
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message.ToString());
 
+            }
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<List<Producto>>> ListaProductos()
+        {
+            try
+            {
+                var lista = await contexto.Producto.Where(x => x.Estado == true).ToListAsync();
+                return Ok(lista);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message.ToString());
             }
         }
         #endregion

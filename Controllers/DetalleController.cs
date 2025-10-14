@@ -32,7 +32,7 @@ namespace Api_Labodeguita.net.Controllers
         {
             try
             {
-                var detalle = await contexto.Detalles.SingleOrDefaultAsync(x => x.Id == id);
+                var detalle = await contexto.Detalle.SingleOrDefaultAsync(x => x.Id == id);
                 return detalle != null ? Ok(detalle) : NotFound();
             }
             catch (Exception ex)
