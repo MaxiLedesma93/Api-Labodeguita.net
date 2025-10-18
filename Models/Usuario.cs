@@ -25,5 +25,7 @@ namespace Api_Labodeguita.net.Models{
 
         public bool Estado { get; set; }
         public string Clave { get; set; }
+
+        public string Rol { get; set; }
    }
 }

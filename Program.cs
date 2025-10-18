@@ -1,6 +1,10 @@
 
 using Api_Labodeguita.net.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+
 
 
 
@@ -23,6 +27,46 @@ builder.Services.AddDbContext<DataContext>(
 	)
 );
 
+builder.Services.AddAuthentication().AddJwtBearer(options =>//la api web valida con token
+	{
+		options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+		{
+			ValidateIssuer = true,
+			ValidateAudience = true,
+			ValidateLifetime = true,
+			ValidateIssuerSigningKey = true,
+			ValidIssuer = configuration["TokenAuthentication:Issuer"],
+			ValidAudience = configuration["TokenAuthentication:Audience"],
+			IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.ASCII.GetBytes(
+				configuration["TokenAuthentication:SecretKey"]))
+		};
+		// opción extra para usar el token en el hub y otras peticiones sin encabezado (enlaces, src de img, etc.)
+		options.Events = new JwtBearerEvents
+		{
+			OnMessageReceived = context =>
+			{
+				// Leer el token desde el query string
+				var accessToken = context.Request.Query["access_token"];
+				// Si el request es para el Hub u otra ruta seleccionada...
+				var path = context.HttpContext.Request.Path;
+				if (!string.IsNullOrEmpty(accessToken) &&
+					(path.StartsWithSegments("/usuarios/token")))
+				{//reemplazar las urls por las necesarias ruta ⬆
+					context.Token = accessToken;
+				}
+				return Task.CompletedTask;
+			}
+		};
+	});
+
+builder.Services.AddAuthorization(options =>
+{
+	options.AddPolicy("Cliente", policy =>
+		policy.RequireClaim(ClaimTypes.Role, "Cliente"));
+	options.AddPolicy("Recepcionista", policy =>
+		policy.RequireClaim(ClaimTypes.Role, "Recepcionista"));
+
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -38,7 +82,7 @@ app.UseCors(x => x
 	.AllowAnyMethod()
 	.AllowAnyHeader());
 app.UseStaticFiles();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
