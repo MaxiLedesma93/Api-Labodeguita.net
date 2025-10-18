@@ -38,9 +38,10 @@ namespace Api_Labodeguita.net.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ex.Message.ToString());
-
             }
         }
+
+
         #endregion
     }
 }

@@ -45,6 +45,7 @@ namespace Api_Labodeguita.net.Controllers
         }
 
         [HttpGet]
+        //Obtiene una lista de productos
         public async Task<ActionResult<List<Producto>>> ListaProductos()
         {
             try
@@ -59,6 +60,7 @@ namespace Api_Labodeguita.net.Controllers
         }
 
         [HttpPost("GuardarProducto")]
+        //Alta producto
         public async Task<IActionResult> GuardarProducto([FromForm] Producto producto)
         {
             try
@@ -70,13 +72,43 @@ namespace Api_Labodeguita.net.Controllers
 
                     return CreatedAtAction(nameof(GetProducto), new { id = producto.Id }, producto);
                 }
-                else {
-                return BadRequest("Model State no es valido.");
+                else
+                {
+                    return BadRequest("Model State no es valido.");
+                }
             }
-            }catch (Exception ex){
+            catch (Exception ex)
+            {
                 return BadRequest(ex.InnerException?.Message ?? ex.Message);
             }
         }
+
+        [HttpPatch("{id}")]
+        //Editar producto
+        public async Task<IActionResult> EditarProducto(Producto producto)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    if (producto != null)
+                    {
+                        contexto.Producto.Update(producto);
+                        await contexto.SaveChangesAsync();
+                        return Ok(producto);
+                    }
+                    else return BadRequest();
+                }
+                else
+                {
+                    return BadRequest("Model State no es valido.");
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message.ToString());
+            }
+        } 
         #endregion
     }
 }
