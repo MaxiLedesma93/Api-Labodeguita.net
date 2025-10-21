@@ -12,8 +12,10 @@ namespace Api_Labodeguita.net.Models
         [Required, Display(Name ="Pedido")]
         public int IdPedido { get; set; }
        
-        [Required, Display(Name ="Producto")]
+        [Required, Display(Name = "Producto")]
         public int IdProducto { get; set; }
+        
+        public int Cantidad { get; set; }
     }
 }
 

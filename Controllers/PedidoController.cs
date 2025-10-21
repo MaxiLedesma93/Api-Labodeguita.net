@@ -36,7 +36,7 @@ namespace Api_Labodeguita.net.Controllers
                 var cliente = User.Identity.Name;
                 var pedidos = await contexto.Pedido
                                 .Include(x => x.Cliente)
-                                .Include(x => x.Detalle)
+                                .Include(x => x.Estado)
                                 .Where(x => x.Cliente.Email == cliente)
                                 .SingleOrDefaultAsync(x => x.Id == id);
 
@@ -45,11 +45,35 @@ namespace Api_Labodeguita.net.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ex.Message.ToString());
-
             }
         }
 
-        
+        [HttpGet("ListarPedidos/{idEstado}")] 
+        //Lo usa la recepcionista, devuelve una lista de todos los pedidos
+        //que esten en estado = "Recibido", "En Preparación", "Terminado"
+        public async Task<ActionResult<List<Pedido>>> ListaPedidos(int idEstado)
+        {
+            try
+            {
+                var listaP = await contexto.Pedido
+                .Include(x => x.Cliente)
+                .Include(x => x.Estado)
+                .Where(x => x.EstadoId == idEstado).ToListAsync();
+                if (listaP != null)
+                {
+                    return Ok(listaP);
+                }
+                else
+                {
+                    //!ver como devolver un mensaje de no hay registros
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message.ToString());
+            }
+        } 
         #endregion
     }
 }
