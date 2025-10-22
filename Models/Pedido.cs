@@ -22,5 +22,7 @@ namespace Api_Labodeguita.net.Models
         public Estado Estado { get; set; }
 
         public bool Pagado { get; set; }
+
+        public List<Detalle> Detalles { get; set; }
     }
 }

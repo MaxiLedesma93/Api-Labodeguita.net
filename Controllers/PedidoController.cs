@@ -34,12 +34,14 @@ namespace Api_Labodeguita.net.Controllers
             try
             {
                 var cliente = User.Identity.Name;
+                var detalles = await contexto.Detalle.Where(x => x.PedidoId == id).ToListAsync();
                 var pedidos = await contexto.Pedido
                                 .Include(x => x.Cliente)
                                 .Include(x => x.Estado)
                                 .Where(x => x.Cliente.Email == cliente)
                                 .SingleOrDefaultAsync(x => x.Id == id);
 
+                pedidos.Detalles = detalles;
                 return pedidos != null ? Ok(pedidos) : NotFound();
             }
             catch (Exception ex)
@@ -48,7 +50,7 @@ namespace Api_Labodeguita.net.Controllers
             }
         }
 
-        [HttpGet("ListarPedidos/{idEstado}")] 
+        [HttpGet("ListarPedidos/{idEstado}")]
         //Lo usa la recepcionista, devuelve una lista de todos los pedidos
         //que esten en estado = "Recibido", "En Preparación", "Terminado"
         public async Task<ActionResult<List<Pedido>>> ListaPedidos(int idEstado)
@@ -59,6 +61,33 @@ namespace Api_Labodeguita.net.Controllers
                 .Include(x => x.Cliente)
                 .Include(x => x.Estado)
                 .Where(x => x.EstadoId == idEstado).ToListAsync();
+                if (listaP != null)
+                {
+                    return Ok(listaP);
+                }
+                else
+                {
+                    //!ver como devolver un mensaje de no hay registros
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message.ToString());
+            }
+        }
+
+        [HttpGet("ListarPedidosPorUsuario")]
+        public async Task<ActionResult<List<Pedido>>> ListaPedidosPorUsuario()
+        {
+            try
+            {
+                var cliente = User.Identity.Name;
+
+                var listaP = await contexto.Pedido
+                .Include(x => x.Cliente)
+                .Include(x => x.Estado)
+                .Where(x => x.Cliente.Email == cliente).ToListAsync();
                 if (listaP != null)
                 {
                     return Ok(listaP);
