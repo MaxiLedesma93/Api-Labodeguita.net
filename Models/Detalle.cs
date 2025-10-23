@@ -16,6 +16,8 @@ namespace Api_Labodeguita.net.Models
         public int ProductoId { get; set; }
         
         public int Cantidad { get; set; }
+
+        public Producto Producto { get; set; }
     }
 }
 
