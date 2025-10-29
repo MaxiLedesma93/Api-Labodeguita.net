@@ -19,5 +19,8 @@ namespace Api_Labodeguita.net.Models{
         public bool Estado { get; set; }
 
         public string? Foto { get; set; }
+
+        [NotMapped]
+		public IFormFile? Imagen { get; set;}
    }
 }

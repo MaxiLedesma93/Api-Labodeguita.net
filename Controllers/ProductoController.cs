@@ -5,6 +5,16 @@ using MySqlX.XDevAPI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
+using System.Text.Json.Serialization.Metadata;
+using System.IO;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Api_Labodeguita.net.Controllers
 {
@@ -13,7 +23,7 @@ namespace Api_Labodeguita.net.Controllers
 
     public class ProductoController : ControllerBase
     {
-         #region Propiedades
+        #region Propiedades
         private readonly DataContext contexto;
         public IConfiguration config { get; }
         public IWebHostEnvironment environment { get; }
@@ -51,6 +61,7 @@ namespace Api_Labodeguita.net.Controllers
             try
             {
                 var lista = await contexto.Producto.Where(x => x.Estado == true).ToListAsync();
+
                 return Ok(lista);
             }
             catch (Exception ex)
@@ -65,10 +76,19 @@ namespace Api_Labodeguita.net.Controllers
         {
             try
             {
+                producto.Foto = "Sin foto";
                 if (ModelState.IsValid)
                 {
                     contexto.Add(producto);
                     await contexto.SaveChangesAsync();
+                    if(producto.Imagen!=null){
+                        var imagePath = await guardarImagen(producto);
+                        producto.Foto = imagePath;
+                        await contexto.SaveChangesAsync();
+                        //seteo null la imagen para evitar un error de que llega un objeto cuando espera un array el retrofit.
+                        producto.Imagen = null;
+                    }
+                    
 
                     return CreatedAtAction(nameof(GetProducto), new { id = producto.Id }, producto);
                 }
@@ -83,32 +103,79 @@ namespace Api_Labodeguita.net.Controllers
             }
         }
 
-        [HttpPatch("{id}")]
+        [HttpPatch("EditarProducto")]
         //Editar producto
-        public async Task<IActionResult> EditarProducto(Producto producto)
+        public async Task<IActionResult> Patch([FromBody] Producto p)
         {
             try
             {
-                if (ModelState.IsValid)
+
+                Producto productoBD = await contexto.Producto.AsNoTracking().FirstOrDefaultAsync(x => x.Id == p.Id);
+                // productoBD.Nombre = p.Nombre;
+                // productoBD.Precio = p.Precio;
+                // productoBD.Estado = p.Estado;
+                if (p.Imagen != null)
                 {
-                    if (producto != null)
-                    {
-                        contexto.Producto.Update(producto);
-                        await contexto.SaveChangesAsync();
-                        return Ok(producto);
-                    }
-                    else return BadRequest();
+                    var imagePath = await guardarImagen(p);
+                    p.Foto = imagePath;
+                    //seteo null la imagen para evitar un error de que llega un objeto cuando espera un array el retrofit.
+                    p.Imagen = null;
                 }
                 else
                 {
-                    return BadRequest("Model State no es valido.");
+                    p.Foto = productoBD.Foto;
                 }
+                if (ModelState.IsValid){ 
+					contexto.Producto.Update(p);
+					await contexto.SaveChangesAsync();
+					return Ok(p);
+				}
+                return BadRequest();
+                
+                
+                
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message.ToString());
             }
-        } 
+        }
         #endregion
+
+
+        //funcion asincrona para guardar la imagen y modificarle tamaño.
+        public async Task<string> guardarImagen(Producto entidad)
+        {
+            try
+            {
+                string wwwPath = environment.WebRootPath;
+                string path = Path.Combine(wwwPath, "uploads/productos");
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
+                }
+                string fileName = "producto_" + entidad.Id + Path.GetExtension(entidad.Imagen.FileName);
+                string pathCompleto = Path.Combine(path, fileName);
+
+                // Esta operación guarda la foto en memoria en la ruta que necesitamos
+                using (FileStream stream = new FileStream(pathCompleto, FileMode.Create))
+                {
+                    await entidad.Imagen.CopyToAsync(stream);
+                    stream.Dispose();
+                }
+                using (var image = Image.Load(pathCompleto))
+                {
+                    image.Mutate(x => x.Resize(500, 500));
+                    var resizedImagePath = Path.Combine(environment.WebRootPath, "uploads/productos", Path.GetFileName(fileName));
+                    image.Save(resizedImagePath);
+                    return Path.Combine("uploads/productos", Path.GetFileName(pathCompleto)).Replace("\\", "/");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return (ex.Message);
+            }
+        }
     }
 }
