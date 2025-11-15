@@ -61,6 +61,20 @@ namespace Api_Labodeguita.net.Controllers
             }
         }
 
+        [HttpGet("perfil")]
+        public async Task<ActionResult<Usuario>> Get()
+        {
+            try
+            {
+                var usuario = User.Identity.Name;
+                return await contexto.Usuario.SingleOrDefaultAsync(x => x.Email == usuario);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
+        }
+
         //localhost:5000/usuario/nuevo
         [HttpPost("Nuevo")]
         [AllowAnonymous]
