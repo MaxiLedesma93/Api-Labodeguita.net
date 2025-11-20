@@ -135,8 +135,9 @@ namespace Api_Labodeguita.net.Controllers
         //localhost:5000/usuario/editar
         [HttpPatch("Editar")]
         [Authorize]
-        public async Task<IActionResult> Editar([FromForm] Usuario usuario)
+        public async Task<IActionResult> Editar([FromBody] Usuario usuario)
         {
+            Console.WriteLine("Usuario recibido: " + System.Text.Json.JsonSerializer.Serialize(usuario));
             try
             {
                 //obtengo el email del usuario mediante la claim Name.
@@ -148,18 +149,30 @@ namespace Api_Labodeguita.net.Controllers
                 usuario.Email = usuarioLogueado.Email;
                 usuario.Estado = usuarioLogueado.Estado;
                 usuario.Rol = usuarioLogueado.Rol;
+                Console.WriteLine("FUERA MODEL STATE: " + usuario.Nombre);
+                Console.WriteLine("MODEL STATE: " + ModelState.IsValid);
 
-
+                foreach (var kvp in ModelState)
+{
+    foreach (var error in kvp.Value.Errors)
+    {
+        Console.WriteLine($"ModelState Error - Campo: {kvp.Key} | Error: {error.ErrorMessage}");
+    }
+}
                 if (ModelState.IsValid)
                 {
                     contexto.Usuario.Update(usuario);
                     await contexto.SaveChangesAsync();
+                    Console.WriteLine("DENTRO MODEL STATE: " + usuario.Nombre);
+                    Console.WriteLine("MODEL STATE: " + System.Text.Json.JsonSerializer.Serialize(ModelState));
                     return Ok(usuario);
                 }
+                //Console.WriteLine("MODEL STATE: " + ModelState.ToString());
                 return BadRequest();
             }
             catch (Exception ex)
             {
+                Console.WriteLine("DENTRO CATCH: " + ex.Message.ToString());
                 return BadRequest(ex.Message.ToString());
             }
         }
