@@ -76,7 +76,7 @@ namespace Api_Labodeguita.net.Controllers
         }
 
         //localhost:5000/usuario/nuevo
-        [HttpPost("Nuevo")]
+        [HttpPost("Registrar")]
         [AllowAnonymous]
         public async Task<IActionResult> Nuevo([FromForm] Usuario usuario)
         {
@@ -91,6 +91,11 @@ namespace Api_Labodeguita.net.Controllers
                     {
                         usuario.Rol = "Cliente";
                     }
+                    if (User.IsInRole("Recepcionista"))
+                    {
+                        usuario.Rol = "Recepcionista";
+                    }
+                  
                 }
                 else
                 {
@@ -151,14 +156,14 @@ namespace Api_Labodeguita.net.Controllers
                 usuario.Rol = usuarioLogueado.Rol;
                 Console.WriteLine("FUERA MODEL STATE: " + usuario.Nombre);
                 Console.WriteLine("MODEL STATE: " + ModelState.IsValid);
-
+                /*
                 foreach (var kvp in ModelState)
-{
-    foreach (var error in kvp.Value.Errors)
-    {
-        Console.WriteLine($"ModelState Error - Campo: {kvp.Key} | Error: {error.ErrorMessage}");
-    }
-}
+                {
+                    foreach (var error in kvp.Value.Errors)
+                    {
+                        Console.WriteLine($"ModelState Error - Campo: {kvp.Key} | Error: {error.ErrorMessage}");
+                    }
+                } */
                 if (ModelState.IsValid)
                 {
                     contexto.Usuario.Update(usuario);
