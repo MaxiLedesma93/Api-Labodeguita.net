@@ -66,7 +66,18 @@ namespace Api_Labodeguita.net.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message.ToString());
+                  // 3. ¡SI ALGO FALLA, LA EXCEPCIÓN SE CAPTURA AQUÍ!
+                    // En lugar de crashear, el servidor ahora hará dos cosas:
+
+                    // a. Registrar el error en la consola del servidor para que tú puedas verlo.
+                    Console.WriteLine($"Error al listar productos: {ex.Message}");
+                    // (En un proyecto real, usarías un sistema de logging como ILogger)
+
+                    // b. Devolver una respuesta de error 500 limpia a la app de Android.
+                    // Esto NO causará 'unexpected end of stream'. Retrofit lo interpretará
+                    // como un error HTTP y podrás manejarlo en el callback onFailure.
+                    return StatusCode(500, $"Error interno del servidor: {ex.Message}");
+                //return BadRequest(ex.Message.ToString());
             }
         }
 
