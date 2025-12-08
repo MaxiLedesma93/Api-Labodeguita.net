@@ -54,7 +54,7 @@ namespace Api_Labodeguita.net.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpGet ("listar")]
         //Obtiene una lista de productos
         public async Task<ActionResult<List<Producto>>> ListaProductos()
         {
