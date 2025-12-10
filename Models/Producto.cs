@@ -22,5 +22,7 @@ namespace Api_Labodeguita.net.Models{
 
         [NotMapped]
 		public IFormFile? Imagen { get; set;}
+
+        public string Descripcion {get; set;}
    }
 }
