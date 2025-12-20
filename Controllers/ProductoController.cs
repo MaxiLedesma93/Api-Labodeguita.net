@@ -116,7 +116,7 @@ namespace Api_Labodeguita.net.Controllers
 
         [HttpPatch("EditarProducto")]
         //Editar producto
-        public async Task<IActionResult> Patch([FromBody] Producto p)
+        public async Task<IActionResult> Patch([FromForm] Producto p)
         {
             try
             {
@@ -129,6 +129,7 @@ namespace Api_Labodeguita.net.Controllers
                 {
                     var imagePath = await guardarImagen(p);
                     p.Foto = imagePath;
+                    await contexto.SaveChangesAsync();
                     //seteo null la imagen para evitar un error de que llega un objeto cuando espera un array el retrofit.
                     p.Imagen = null;
                 }
@@ -136,6 +137,15 @@ namespace Api_Labodeguita.net.Controllers
                 {
                     p.Foto = productoBD.Foto;
                 }
+                 Console.WriteLine("MODEL STATE: " + ModelState.IsValid);
+                
+                foreach (var kvp in ModelState)
+                {
+                    foreach (var error in kvp.Value.Errors)
+                    {
+                        Console.WriteLine($"ModelState Error - Campo: {kvp.Key} | Error: {error.ErrorMessage}");
+                    }
+                } 
                 if (ModelState.IsValid){ 
 					contexto.Producto.Update(p);
 					await contexto.SaveChangesAsync();
