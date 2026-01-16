@@ -147,6 +147,7 @@ namespace Api_Labodeguita.net.Controllers
                     }
                 } 
                 if (ModelState.IsValid){ 
+                    Console.WriteLine($"-------precio del producto = {p.Precio}");
 					contexto.Producto.Update(p);
 					await contexto.SaveChangesAsync();
 					return Ok(p);
@@ -177,7 +178,11 @@ namespace Api_Labodeguita.net.Controllers
                 }
                 string fileName = "producto_" + entidad.Id + Path.GetExtension(entidad.Imagen.FileName);
                 string pathCompleto = Path.Combine(path, fileName);
-
+                if (System.IO.File.Exists(pathCompleto))
+                {
+                    System.IO.File.Delete(pathCompleto);
+                }
+					
                 // Esta operación guarda la foto en memoria en la ruta que necesitamos
                 using (FileStream stream = new FileStream(pathCompleto, FileMode.Create))
                 {
