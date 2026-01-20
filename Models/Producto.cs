@@ -24,5 +24,7 @@ namespace Api_Labodeguita.net.Models{
 		public IFormFile? Imagen { get; set;}
 
         public string Descripcion {get; set;}
+
+        public string Tipo {get; set;}
    }
 }
