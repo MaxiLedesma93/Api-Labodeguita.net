@@ -25,6 +25,12 @@ namespace Api_Labodeguita.net.Models{
 
         public string Descripcion {get; set;}
 
-        public string Tipo {get; set;}
+        public int IdTipo {get; set;}
+        [NotMapped]
+
+        public string? TipoProducto {get; set;}
+
+        [NotMapped]
+        public Tipo tipo {get; set;}
    }
 }

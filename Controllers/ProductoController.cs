@@ -90,6 +90,13 @@ namespace Api_Labodeguita.net.Controllers
                 producto.Foto = "Sin foto";
                 if (ModelState.IsValid)
                 {
+                    //aca deberiamos agregar el idTipo al producto, de acuerdo a la descTipo que viene de
+                    // la vista. buscandola en la tabla de tipos por descripcion.
+                   var tipo = await contexto.Tipo.SingleOrDefaultAsync(x => x.Descripcion == producto.TipoProducto);
+                    if (tipo!= null)
+                    {
+                        producto.IdTipo = tipo.Id;
+                    }
                     contexto.Add(producto);
                     await contexto.SaveChangesAsync();
                     if(producto.Imagen!=null){
@@ -100,7 +107,6 @@ namespace Api_Labodeguita.net.Controllers
                         producto.Imagen = null;
                     }
                     
-
                     return CreatedAtAction(nameof(GetProducto), new { id = producto.Id }, producto);
                 }
                 else
