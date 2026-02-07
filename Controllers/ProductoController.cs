@@ -88,6 +88,16 @@ namespace Api_Labodeguita.net.Controllers
             try
             {
                 producto.Foto = "Sin foto";
+                //producto.IdTipo = 0;
+                 Console.WriteLine("MODEL STATE: " + ModelState.IsValid);
+                
+                    foreach (var kvp in ModelState)
+                    {
+                        foreach (var error in kvp.Value.Errors)
+                        {
+                            Console.WriteLine($"ModelState Error - Campo: {kvp.Key} | Error: {error.ErrorMessage}");
+                        }
+                    } 
                 if (ModelState.IsValid)
                 {
                     //aca deberiamos agregar el idTipo al producto, de acuerdo a la descTipo que viene de
@@ -106,6 +116,7 @@ namespace Api_Labodeguita.net.Controllers
                         //seteo null la imagen para evitar un error de que llega un objeto cuando espera un array el retrofit.
                         producto.Imagen = null;
                     }
+                    
                     
                     return CreatedAtAction(nameof(GetProducto), new { id = producto.Id }, producto);
                 }
@@ -126,6 +137,11 @@ namespace Api_Labodeguita.net.Controllers
         {
             try
             {
+                var tipo = await contexto.Tipo.SingleOrDefaultAsync(x => x.Descripcion == p.TipoProducto);
+                    if (tipo!= null)
+                    {
+                        p.IdTipo = tipo.Id;
+                    }
 
                 Producto productoBD = await contexto.Producto.AsNoTracking().FirstOrDefaultAsync(x => x.Id == p.Id);
                 // productoBD.Nombre = p.Nombre;
