@@ -54,13 +54,17 @@ namespace Api_Labodeguita.net.Controllers
             }
         }
 
-        [HttpGet ("listar")]
+        [HttpGet ("listar/{tipoProducto}")]
         //Obtiene una lista de productos
-        public async Task<ActionResult<List<Producto>>> ListaProductos()
+        public async Task<ActionResult<List<Producto>>> ListaProductos(string tipoProducto)
         {
             try
             {
-                var lista = await contexto.Producto.Where(x => x.Estado == true).ToListAsync();
+                
+                var tipo = await contexto.Tipo.SingleOrDefaultAsync(x=> x.Descripcion == tipoProducto);
+                
+                var lista =  await contexto.Producto.Where(x => x.Estado == true && x.IdTipo== tipo.Id ).ToListAsync();
+                
 
                 return Ok(lista);
             }
@@ -116,7 +120,6 @@ namespace Api_Labodeguita.net.Controllers
                         //seteo null la imagen para evitar un error de que llega un objeto cuando espera un array el retrofit.
                         producto.Imagen = null;
                     }
-                    
                     
                     return CreatedAtAction(nameof(GetProducto), new { id = producto.Id }, producto);
                 }
