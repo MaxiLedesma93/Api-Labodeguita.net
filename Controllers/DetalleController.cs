@@ -40,6 +40,30 @@ namespace Api_Labodeguita.net.Controllers
                 return BadRequest(ex.Message.ToString());
             }
         }
+        [HttpPost("GuardarDetalle")]
+        public async Task<IActionResult> GuardarDetalle([FromForm] Detalle detalle)
+
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    contexto.Add(detalle);
+                    await contexto.SaveChangesAsync();
+                    return CreatedAtAction(nameof(GetDetalle), new { id = detalle.Id }, detalle);
+                }
+                else
+                {
+                    return BadRequest("Model state no es valido");
+                }
+                 
+            }catch(Exception ex)
+            {
+                return BadRequest(ex.InnerException?.Message ?? ex.Message);
+            }
+           
+            
+        }
 
 
         #endregion

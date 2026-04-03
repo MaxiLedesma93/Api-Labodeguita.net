@@ -24,5 +24,8 @@ namespace Api_Labodeguita.net.Models
         public bool Pagado { get; set; }
 
         public List<Detalle> Detalles { get; set; }
+
+        public bool Delivery {get; set;}
+        public string DireccionEntrega {get; set;}
     }
 }

@@ -80,7 +80,8 @@ namespace Api_Labodeguita.net.Controllers
             }
         }
 
-        [HttpGet("ListarPedidosPorUsuario")]
+        //lista los pedidos al usuario logueado
+        [HttpGet("ListarPedidosDeUsuario")]
         [Authorize]
         public async Task<ActionResult<List<Pedido>>> ListaPedidosPorUsuario()
         {
@@ -201,6 +202,30 @@ namespace Api_Labodeguita.net.Controllers
             {
                 return BadRequest(ex.Message.ToString());
             }
+        }
+        [HttpPost("GuardarPedido")]
+        public async Task<IActionResult> GuardarPedido([FromForm] Pedido pedido)
+
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    contexto.Add(pedido);
+                    await contexto.SaveChangesAsync();
+                    return CreatedAtAction(nameof(GetPedido), new { id = pedido.Id }, pedido);
+                }
+                else
+                {
+                    return BadRequest("Model state no es valido");
+                }
+                 
+            }catch(Exception ex)
+            {
+                return BadRequest(ex.InnerException?.Message ?? ex.Message);
+            }
+           
+            
         }
         #endregion
     }
