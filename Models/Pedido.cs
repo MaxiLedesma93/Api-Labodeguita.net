@@ -15,15 +15,15 @@ namespace Api_Labodeguita.net.Models
         [Required]
         public DateTime Fecha { get; set; }
 
-        public Usuario Cliente { get; set; }
+        public Usuario? Cliente { get; set; }
 
         public int EstadoId { get; set; }
 
-        public Estado Estado { get; set; }
+        public Estado? Estado { get; set; }
 
         public bool Pagado { get; set; }
 
-        public List<Detalle> Detalles { get; set; }
+        public List<Detalle>? Detalles { get; set; }
 
         public bool Delivery {get; set;}
         public string DireccionEntrega {get; set;}

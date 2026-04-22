@@ -90,15 +90,26 @@ namespace Api_Labodeguita.net.Controllers
                 var cliente = User.Identity.Name;
 
                 var listaP = await contexto.Pedido
-                .Include(x => x.Cliente)
-                .Include(x => x.Estado)
-                .Where(x => x.Cliente.Email == cliente).ToListAsync();
+                    .AsNoTracking()
+                    .Include(x => x.Cliente)
+                    .Include(x => x.Estado)
+                    .Where(x => x.Cliente.Email == cliente)
+                    .OrderByDescending(x => x.Id)
+                    //traemos los ultimos 10 pedidos del cliente.
+                    .Take<Pedido>(10)
+                    .ToListAsync();
 
                 foreach (Pedido p in listaP)
                 {
                     var detalles = await contexto.Detalle.Where(x => x.PedidoId == p.Id).ToListAsync();
                     p.Detalles = detalles;
+                    foreach (Detalle d in detalles)
+                    {
+                        var producto = await contexto.Producto.SingleOrDefaultAsync(x => x.Id == d.ProductoId);
+                        d.Producto = producto;
+                    }
                 }
+                
                 if (listaP != null)
                 {
                     return Ok(listaP);
@@ -125,8 +136,8 @@ namespace Api_Labodeguita.net.Controllers
                                     .Include(x => x.Cliente)
                                     .Include(x => x.Estado)
                                     .SingleOrDefaultAsync(x => x.Id == IdPedido);
-                var detalles = await contexto.Detalle.Where(x => x.PedidoId == IdPedido).ToListAsync();
-                pedido.Detalles = detalles;
+               // var detalles = await contexto.Detalle.Where(x => x.PedidoId == IdPedido).ToListAsync();
+                //pedido.Detalles = detalles;
 
                 if (pedido != null)
                 {
@@ -209,6 +220,15 @@ namespace Api_Labodeguita.net.Controllers
         {
             try
             {
+                Console.WriteLine("MODEL STATE: " + ModelState.IsValid);
+                
+                foreach (var kvp in ModelState)
+                {
+                    foreach (var error in kvp.Value.Errors)
+                    {
+                        Console.WriteLine($"ModelState Error - Campo: {kvp.Key} | Error: {error.ErrorMessage}");
+                    }
+                } 
                 if (ModelState.IsValid)
                 {
                     contexto.Add(pedido);

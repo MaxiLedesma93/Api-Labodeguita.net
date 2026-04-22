@@ -17,7 +17,7 @@ namespace Api_Labodeguita.net.Models
         
         public int Cantidad { get; set; }
 
-        public Producto Producto { get; set; }
+        public Producto? Producto { get; set; }
     }
 }
 

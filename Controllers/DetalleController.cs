@@ -40,12 +40,46 @@ namespace Api_Labodeguita.net.Controllers
                 return BadRequest(ex.Message.ToString());
             }
         }
+        [HttpGet("obtenerdetalleporpedido/{pedidoId}")]
+        //localhost/detalle/${id}
+        public async Task<ActionResult> GetDetallePorPedido(int pedidoId)
+        {
+            try
+            {
+                var detalle = await contexto.Detalle
+                .Where(x => x.PedidoId == pedidoId)
+                .Select(x => new 
+                {
+                    x.Id,
+                    x.Cantidad,
+                    x.PedidoId,
+                    x.ProductoId,
+                    x.Producto //tratamos de enviar el producto.
+                })
+                .ToListAsync();
+                return detalle != null ? Ok(detalle) : NotFound();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message.ToString());
+            }
+        }
         [HttpPost("GuardarDetalle")]
         public async Task<IActionResult> GuardarDetalle([FromForm] Detalle detalle)
 
         {
             try
             {
+                Console.WriteLine("MODEL STATE: " + ModelState.IsValid);
+                
+                foreach (var kvp in ModelState)
+                {
+                    foreach (var error in kvp.Value.Errors)
+                    {
+                        Console.WriteLine($"ModelState Error - Campo: {kvp.Key} | Error: {error.ErrorMessage}");
+                    }
+                } 
+                
                 if (ModelState.IsValid)
                 {
                     contexto.Add(detalle);
