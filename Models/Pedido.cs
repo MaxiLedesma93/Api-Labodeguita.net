@@ -27,5 +27,10 @@ namespace Api_Labodeguita.net.Models
 
         public bool Delivery {get; set;}
         public string DireccionEntrega {get; set;}
+
+        public double ImporteTotal { get; set; }
+
+        public string MetodoDePago {get; set;}
+
     }
 }

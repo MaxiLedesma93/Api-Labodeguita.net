@@ -156,20 +156,22 @@ namespace Api_Labodeguita.net.Controllers
 
         [HttpPatch("RegistrarPago")]
         [Authorize]
-        public async Task<ActionResult> RegistrarPago(int idPedido)
+        public async Task<ActionResult> RegistrarPago([FromForm]int IdPedido, string MetodoDePago)
         {
             try
             {
                 var pedido = await contexto.Pedido
                                     .Include(x => x.Cliente)
                                     .Include(x => x.Estado)
-                                    .SingleOrDefaultAsync(x => x.Id == idPedido);
-                var detalles = await contexto.Detalle.Where(x => x.PedidoId == idPedido).ToListAsync();
+                                    .SingleOrDefaultAsync(x => x.Id == IdPedido);
+                var detalles = await contexto.Detalle.Where(x => x.PedidoId == IdPedido).ToListAsync();
                 pedido.Detalles = detalles;
 
                 if (pedido != null)
                 {
+                    
                     pedido.Pagado = true;
+                    pedido.MetodoDePago = MetodoDePago;
                     contexto.Pedido.Update(pedido);
                     await contexto.SaveChangesAsync();
                     return Ok(pedido);
