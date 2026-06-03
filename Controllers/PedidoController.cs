@@ -156,7 +156,7 @@ namespace Api_Labodeguita.net.Controllers
 
         [HttpPatch("RegistrarPago")]
         [Authorize]
-        public async Task<ActionResult> RegistrarPago([FromForm]int IdPedido, string MetodoDePago)
+        public async Task<ActionResult> RegistrarPago([FromForm]int IdPedido, string MetodoDePago, bool Pagado)
         {
             try
             {
@@ -170,7 +170,7 @@ namespace Api_Labodeguita.net.Controllers
                 if (pedido != null)
                 {
                     
-                    pedido.Pagado = true;
+                    pedido.Pagado = Pagado;
                     pedido.MetodoDePago = MetodoDePago;
                     contexto.Pedido.Update(pedido);
                     await contexto.SaveChangesAsync();
@@ -248,6 +248,39 @@ namespace Api_Labodeguita.net.Controllers
             }
            
             
+        }
+    
+
+        [HttpPatch("EditarPedido")]
+        //Editar producto
+        public async Task<IActionResult> EditarPedido([FromForm] Pedido p)
+        {
+            try
+            {
+                
+                Producto productoBD = await contexto.Producto.AsNoTracking().FirstOrDefaultAsync(x => x.Id == p.Id);
+                foreach (var kvp in ModelState)
+                {
+                    foreach (var error in kvp.Value.Errors)
+                    {
+                        Console.WriteLine($"ModelState Error - Campo: {kvp.Key} | Error: {error.ErrorMessage}");
+                    }
+                } 
+                if (ModelState.IsValid){ 
+                    
+					contexto.Pedido.Update(p);
+					await contexto.SaveChangesAsync();
+					return Ok(p);
+				}
+                return BadRequest();
+                
+                
+                
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message.ToString());
+            }
         }
         #endregion
     }

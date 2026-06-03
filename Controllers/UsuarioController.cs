@@ -154,8 +154,8 @@ namespace Api_Labodeguita.net.Controllers
                 usuario.Email = usuarioLogueado.Email;
                 usuario.Estado = usuarioLogueado.Estado;
                 usuario.Rol = usuarioLogueado.Rol;
-                Console.WriteLine("FUERA MODEL STATE: " + usuario.Nombre);
-                Console.WriteLine("MODEL STATE: " + ModelState.IsValid);
+                //Console.WriteLine("FUERA MODEL STATE: " + usuario.Nombre);
+                //Console.WriteLine("MODEL STATE: " + ModelState.IsValid);
                 /*
                 foreach (var kvp in ModelState)
                 {
@@ -168,8 +168,8 @@ namespace Api_Labodeguita.net.Controllers
                 {
                     contexto.Usuario.Update(usuario);
                     await contexto.SaveChangesAsync();
-                    Console.WriteLine("DENTRO MODEL STATE: " + usuario.Nombre);
-                    Console.WriteLine("MODEL STATE: " + System.Text.Json.JsonSerializer.Serialize(ModelState));
+                    //Console.WriteLine("DENTRO MODEL STATE: " + usuario.Nombre);
+                    //Console.WriteLine("MODEL STATE: " + System.Text.Json.JsonSerializer.Serialize(ModelState));
                     return Ok(usuario);
                 }
                 //Console.WriteLine("MODEL STATE: " + ModelState.ToString());
@@ -177,7 +177,7 @@ namespace Api_Labodeguita.net.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine("DENTRO CATCH: " + ex.Message.ToString());
+                //Console.WriteLine("DENTRO CATCH: " + ex.Message.ToString());
                 return BadRequest(ex.Message.ToString());
             }
         }

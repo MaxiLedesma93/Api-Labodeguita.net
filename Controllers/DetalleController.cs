@@ -95,9 +95,61 @@ namespace Api_Labodeguita.net.Controllers
             {
                 return BadRequest(ex.InnerException?.Message ?? ex.Message);
             }
-           
-            
         }
+        
+         [HttpDelete("borrardetalle/{id}")]
+        //localhost/detalle/${id}
+        public async Task<ActionResult> BorrarDetalle(int id)
+        {
+            try
+            {
+                var detalle = await contexto.Detalle.SingleOrDefaultAsync(x => x.Id == id);
+                if(detalle != null)
+                {
+                     contexto.Detalle.Remove(detalle);
+                }
+                contexto.SaveChanges();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message.ToString());
+            }
+        }
+         [HttpPatch("EditarDetalle")]
+        public async Task<IActionResult> EditarDetalle([FromForm] Detalle detalle)
+
+        {
+            try
+            {
+                Console.WriteLine("MODEL STATE: " + ModelState.IsValid);
+                
+                foreach (var kvp in ModelState)
+                {
+                    foreach (var error in kvp.Value.Errors)
+                    {
+                        Console.WriteLine($"ModelState Error - Campo: {kvp.Key} | Error: {error.ErrorMessage}");
+                    }
+                } 
+                
+                if (ModelState.IsValid)
+                {
+                    contexto.Update(detalle);
+                    await contexto.SaveChangesAsync();
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest("Model state no es valido");
+                }
+                 
+            }catch(Exception ex)
+            {
+                return BadRequest(ex.InnerException?.Message ?? ex.Message);
+            }
+        }
+
+
 
 
         #endregion
