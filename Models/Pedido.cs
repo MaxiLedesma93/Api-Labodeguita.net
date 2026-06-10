@@ -21,16 +21,12 @@ namespace Api_Labodeguita.net.Models
 
         public Estado? Estado { get; set; }
 
-        public bool Pagado { get; set; }
 
         public List<Detalle>? Detalles { get; set; }
-
         public bool Delivery {get; set;}
         public string DireccionEntrega {get; set;}
-
         public double ImporteTotal { get; set; }
 
-        public string MetodoDePago {get; set;}
 
     }
 }

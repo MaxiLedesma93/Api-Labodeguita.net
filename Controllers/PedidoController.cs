@@ -153,6 +153,7 @@ namespace Api_Labodeguita.net.Controllers
                 return BadRequest(ex.Message.ToString());
             }
         }
+        /*
 
         [HttpPatch("RegistrarPago")]
         [Authorize]
@@ -183,6 +184,8 @@ namespace Api_Labodeguita.net.Controllers
                 return BadRequest(ex.Message.ToString());
             }
         }
+
+        */
         [HttpGet("ListaPedidosPorFecha/{Fecha}")]
         [Authorize]
         public async Task<ActionResult<List<Pedido>>> ListaPedidosPorFecha(DateTime Fecha)
