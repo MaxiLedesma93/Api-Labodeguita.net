@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 namespace Api_Labodeguita.net.Controllers
@@ -71,6 +72,40 @@ namespace Api_Labodeguita.net.Controllers
                 return BadRequest(ex.InnerException?.Message ?? ex.Message);
             } 
         }
+        [HttpGet("TotalFacturadoFecha/{fecha}")]
+        //localhost/pago/${id}
+        public async Task<ActionResult> TotalFacturadoFecha(String Fecha)
+        {
+            try
+            {
+                double totalMp = 0;
+                double totalEfectivo = 0;
+                
+                string formato = "dd-MM-yyyy";
+                DateTime fechaConvertida = DateTime.ParseExact(Fecha, formato, CultureInfo.InvariantCulture);
+                Console.WriteLine(fechaConvertida);
+                var listaPedidos = await contexto.Pedido
+                .Include(x => x.Pago)
+                .Where(x => x.Fecha == fechaConvertida && x.EstadoId == 1).ToListAsync();
+                var listaEnviar = new List<Pago>();
+                foreach (Pedido pedido in listaPedidos) {
+                    if(pedido.Pago != null)
+                    {
+                        pedido.Pago.Direccion = pedido.DireccionEntrega;
+                         listaEnviar.Add(pedido.Pago);
+                    }
+                }
+                
+                
+                
+                return Ok(listaEnviar);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message.ToString());
+            }
+        }
+
         #endregion
     }
 }

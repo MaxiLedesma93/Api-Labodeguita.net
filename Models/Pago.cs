@@ -15,5 +15,7 @@ namespace Api_Labodeguita.net.Models
         public String MetodoDePago  { get; set; }
         
         public double Importe {get; set;}
+        [NotMapped]
+        public String? Direccion{get; set;}
     }
 }

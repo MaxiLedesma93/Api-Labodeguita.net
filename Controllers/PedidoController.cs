@@ -60,19 +60,61 @@ namespace Api_Labodeguita.net.Controllers
         {
             try
             {
-                var listaP = await contexto.Pedido
-                .Include(x => x.Cliente)
-                .Include(x => x.Estado)
-                .Where(x => x.EstadoId == idEstado).ToListAsync();
-                if (listaP != null)
+                if(idEstado != -1)
                 {
-                    return Ok(listaP);
+                    var listaP = await contexto.Pedido
+                        .Include(x => x.Cliente)
+                        .Include(x => x.Estado)
+                        .Where(x => x.EstadoId == idEstado && x.Fecha == DateTime.Today).ToListAsync();
+                    foreach (Pedido p in listaP)
+                        {
+                            var detalles = await contexto.Detalle.Where(x => x.PedidoId == p.Id).ToListAsync();
+                            p.Detalles = detalles;
+                            foreach (Detalle d in detalles)
+                            {
+                                var producto = await contexto.Producto.SingleOrDefaultAsync(x => x.Id == d.ProductoId);
+                                d.Producto = producto;
+                            }
+                        }
+                    if (listaP != null)
+                    {
+                        return Ok(listaP);
+                    }
+                    else
+                    {
+                        
+                        return NotFound();
+                    }
                 }
                 else
                 {
-                    //!ver como devolver un mensaje de no hay registros
-                    return NotFound();
+                    var listaP = await contexto.Pedido
+                        .Include(x => x.Cliente)
+                        .Include(x => x.Estado)
+                        .Where(x => x.Fecha == DateTime.Today && (x.EstadoId == 1 || x.EstadoId == 2)).ToListAsync();
+
+                    foreach (Pedido p in listaP)
+                            {
+                                var detalles = await contexto.Detalle.Where(x => x.PedidoId == p.Id).ToListAsync();
+                                p.Detalles = detalles;
+                                foreach (Detalle d in detalles)
+                                {
+                                    var producto = await contexto.Producto.SingleOrDefaultAsync(x => x.Id == d.ProductoId);
+                                    d.Producto = producto;
+                                }
+                            }
+                    if (listaP != null)
+                    {
+                         
+                        return Ok(listaP);
+                    }
+                    else
+                    {
+                        
+                        return NotFound();
+                    }
                 }
+                
             }
             catch (Exception ex)
             {
@@ -126,22 +168,31 @@ namespace Api_Labodeguita.net.Controllers
             }
         }
 
+//authorize con rol 
         [HttpPatch("CambiarEstadoPedido")]
         [Authorize]
-        public async Task<ActionResult> CambiarEstadoPedido([FromForm] int IdEstado, int IdPedido)
+        public async Task<ActionResult> CambiarEstadoPedido([FromForm] int idPedido, int idEstado)
         {
             try
             {
                 var pedido = await contexto.Pedido
                                     .Include(x => x.Cliente)
-                                    .Include(x => x.Estado)
-                                    .SingleOrDefaultAsync(x => x.Id == IdPedido);
-               // var detalles = await contexto.Detalle.Where(x => x.PedidoId == IdPedido).ToListAsync();
+                                    .SingleOrDefaultAsync(x => x.Id == idPedido);
+               // var detalles = await contexto.Detalle.Where(x => x.PedidoId == idPedido).ToListAsync();
                 //pedido.Detalles = detalles;
 
                 if (pedido != null)
                 {
-                    pedido.EstadoId = IdEstado;
+                    var detalles = await contexto.Detalle.Where(x => x.PedidoId == pedido.Id).ToListAsync();
+                    foreach (Detalle d in detalles)
+                    {
+                        var producto = await contexto.Producto.SingleOrDefaultAsync(x => x.Id == d.ProductoId);
+                        d.Producto = producto;
+                    }
+                    pedido.Detalles = detalles;
+                    var estado = await contexto.Estado.SingleOrDefaultAsync(x => x.Id == idEstado);
+                    pedido.Estado = estado;
+                    pedido.EstadoId = idEstado;
                     contexto.Pedido.Update(pedido);
                     await contexto.SaveChangesAsync();
                     return Ok(pedido);
@@ -153,39 +204,7 @@ namespace Api_Labodeguita.net.Controllers
                 return BadRequest(ex.Message.ToString());
             }
         }
-        /*
-
-        [HttpPatch("RegistrarPago")]
-        [Authorize]
-        public async Task<ActionResult> RegistrarPago([FromForm]int IdPedido, string MetodoDePago, bool Pagado)
-        {
-            try
-            {
-                var pedido = await contexto.Pedido
-                                    .Include(x => x.Cliente)
-                                    .Include(x => x.Estado)
-                                    .SingleOrDefaultAsync(x => x.Id == IdPedido);
-                var detalles = await contexto.Detalle.Where(x => x.PedidoId == IdPedido).ToListAsync();
-                pedido.Detalles = detalles;
-
-                if (pedido != null)
-                {
-                    
-                    pedido.Pagado = Pagado;
-                    pedido.MetodoDePago = MetodoDePago;
-                    contexto.Pedido.Update(pedido);
-                    await contexto.SaveChangesAsync();
-                    return Ok(pedido);
-                }
-                else { return BadRequest("No se encontró el pedido"); }
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message.ToString());
-            }
-        }
-
-        */
+        
         [HttpGet("ListaPedidosPorFecha/{Fecha}")]
         [Authorize]
         public async Task<ActionResult<List<Pedido>>> ListaPedidosPorFecha(DateTime Fecha)
@@ -219,6 +238,7 @@ namespace Api_Labodeguita.net.Controllers
                 return BadRequest(ex.Message.ToString());
             }
         }
+        //fijarse q el estado del pedido no sea distinto a recibido.
         [HttpPost("GuardarPedido")]
         public async Task<IActionResult> GuardarPedido([FromForm] Pedido pedido)
 
@@ -254,6 +274,8 @@ namespace Api_Labodeguita.net.Controllers
         }
     
 
+
+        //filtrar solo para cliente. fijarse q el estado del pedido no sea distinto a recibido.
         [HttpPatch("EditarPedido")]
         //Editar producto
         public async Task<IActionResult> EditarPedido([FromForm] Pedido p)

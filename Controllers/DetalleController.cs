@@ -64,6 +64,7 @@ namespace Api_Labodeguita.net.Controllers
                 return BadRequest(ex.Message.ToString());
             }
         }
+        //fijarse q el estado del pedido no sea distinto a recibido.
         [HttpPost("GuardarDetalle")]
         public async Task<IActionResult> GuardarDetalle([FromForm] Detalle detalle)
 
@@ -116,6 +117,7 @@ namespace Api_Labodeguita.net.Controllers
                 return BadRequest(ex.Message.ToString());
             }
         }
+        //fijarse q el estado del pedido no sea distinto a recibido.
          [HttpPatch("EditarDetalle")]
         public async Task<IActionResult> EditarDetalle([FromForm] Detalle detalle)
 
