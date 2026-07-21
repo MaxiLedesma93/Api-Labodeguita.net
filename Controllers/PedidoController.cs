@@ -9,6 +9,7 @@ using System.Linq;
 
 namespace Api_Labodeguita.net.Controllers
 {
+    [ApiController]
     [Route("[controller]")]
     //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 
@@ -245,25 +246,21 @@ namespace Api_Labodeguita.net.Controllers
         {
             try
             {
-                Console.WriteLine("MODEL STATE: " + ModelState.IsValid);
+                //Console.WriteLine("MODEL STATE: " + ModelState.IsValid);
                 
-                foreach (var kvp in ModelState)
-                {
-                    foreach (var error in kvp.Value.Errors)
-                    {
-                        Console.WriteLine($"ModelState Error - Campo: {kvp.Key} | Error: {error.ErrorMessage}");
-                    }
-                } 
-                if (ModelState.IsValid)
-                {
+                //foreach (var kvp in ModelState)
+                //{
+                 //   foreach (var error in kvp.Value.Errors)
+                 //   {
+                 //       Console.WriteLine($"ModelState Error - Campo: {kvp.Key} | Error: {error.ErrorMessage}");
+                //    }
+               // } 
+                
+                
                     contexto.Add(pedido);
                     await contexto.SaveChangesAsync();
                     return CreatedAtAction(nameof(GetPedido), new { id = pedido.Id }, pedido);
-                }
-                else
-                {
-                    return BadRequest("Model state no es valido");
-                }
+            
                  
             }catch(Exception ex)
             {
