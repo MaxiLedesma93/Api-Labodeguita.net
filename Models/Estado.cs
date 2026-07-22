@@ -8,6 +8,7 @@ namespace Api_Labodeguita.net.Models
         [Display(Name = "Estado Pedido")]
         public int Id { get; set; }
 
+        [Required]
         public string Descripcion { get; set; }
     }
 }

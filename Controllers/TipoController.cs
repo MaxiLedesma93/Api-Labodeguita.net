@@ -1,4 +1,6 @@
 using Api_Labodeguita.net.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -7,8 +9,9 @@ using System.Linq;
 
 namespace Api_Labodeguita.net.Controllers
 {
+    [ApiController]
     [Route("[controller]")]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 
     public class TipoController : ControllerBase
     {
@@ -46,17 +49,10 @@ namespace Api_Labodeguita.net.Controllers
         {
             try
             {
-                if (ModelState.IsValid)
-                {
-                    contexto.Add(tipo);
-                    await contexto.SaveChangesAsync();
-                    return CreatedAtAction(nameof(GetTipo), new { id = tipo.Id }, tipo);
-                }
-                else
-                {
-                    return BadRequest("Model state no es valido");
-                }
-                 
+                contexto.Add(tipo);
+                await contexto.SaveChangesAsync();
+                return CreatedAtAction(nameof(GetTipo), new { id = tipo.Id }, tipo);
+                
             }catch(Exception ex)
             {
                 return BadRequest(ex.InnerException?.Message ?? ex.Message);

@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 
 
@@ -17,8 +18,10 @@ namespace Api_Labodeguita.net.Controllers
 
 {
     //localhost:5000/usuario
+    [ApiController]
     [Route("[controller]")]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class UsuarioController : ControllerBase
     {
          private readonly DataContext contexto;
@@ -32,13 +35,6 @@ namespace Api_Labodeguita.net.Controllers
             this.config = config;
             this.environment = environment;
         }
-
-        //!Actualizar perfil, probar. (hacer que obtenga el perfil de la claim Name(email)).
-        //!Hacer baja logica del perfil. (evita problemas relacionales de la bd, ya que sino deberia borrarse todos los pedidos del usuario).
-        //! Roles, Cliente y Recepcionista.
-
-        //! probar todo.
-
 
         //localhost:5000/usuario/1
         //localhost:5000/usuario/${id}
@@ -102,9 +98,6 @@ namespace Api_Labodeguita.net.Controllers
                     usuario.Rol = "Cliente";
                 }
                
-
-                if (ModelState.IsValid)
-                {
                     var usuarioExistente = await contexto.Usuario.AsNoTracking()
                         .FirstOrDefaultAsync(x => x.Email == usuario.Email);
                     if(usuarioExistente == null || usuarioExistente.Estado == false)
@@ -123,10 +116,6 @@ namespace Api_Labodeguita.net.Controllers
                     {
                         return BadRequest("El email ya se encuentra registrado.");
                     }
-                }
-                return BadRequest();
-
-
 
             }
             catch (Exception ex)
@@ -154,30 +143,13 @@ namespace Api_Labodeguita.net.Controllers
                 usuario.Email = usuarioLogueado.Email;
                 usuario.Estado = usuarioLogueado.Estado;
                 usuario.Rol = usuarioLogueado.Rol;
-                //Console.WriteLine("FUERA MODEL STATE: " + usuario.Nombre);
-                //Console.WriteLine("MODEL STATE: " + ModelState.IsValid);
-                /*
-                foreach (var kvp in ModelState)
-                {
-                    foreach (var error in kvp.Value.Errors)
-                    {
-                        Console.WriteLine($"ModelState Error - Campo: {kvp.Key} | Error: {error.ErrorMessage}");
-                    }
-                } */
-                if (ModelState.IsValid)
-                {
-                    contexto.Usuario.Update(usuario);
-                    await contexto.SaveChangesAsync();
-                    //Console.WriteLine("DENTRO MODEL STATE: " + usuario.Nombre);
-                    //Console.WriteLine("MODEL STATE: " + System.Text.Json.JsonSerializer.Serialize(ModelState));
-                    return Ok(usuario);
-                }
-                //Console.WriteLine("MODEL STATE: " + ModelState.ToString());
-                return BadRequest();
+         
+                contexto.Usuario.Update(usuario);
+                await contexto.SaveChangesAsync();
+                return Ok(usuario);
             }
             catch (Exception ex)
             {
-                //Console.WriteLine("DENTRO CATCH: " + ex.Message.ToString());
                 return BadRequest(ex.Message.ToString());
             }
         }
@@ -234,10 +206,6 @@ namespace Api_Labodeguita.net.Controllers
             {
                 return BadRequest(ex.Message.ToString());
             }
-        }
-
-
-
-           
+        }          
     }
 }

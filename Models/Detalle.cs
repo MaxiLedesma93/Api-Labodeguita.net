@@ -15,6 +15,7 @@ namespace Api_Labodeguita.net.Models
         [Required, Display(Name = "Producto")]
         public int ProductoId { get; set; }
         
+        [Required]
         public int Cantidad { get; set; }
 
         public Producto? Producto { get; set; }

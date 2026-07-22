@@ -1,4 +1,6 @@
 using Api_Labodeguita.net.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -8,8 +10,9 @@ using System.Linq;
 
 namespace Api_Labodeguita.net.Controllers
 {
+    [ApiController]
     [Route("[controller]")]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 
     public class PagoController : ControllerBase
     {
@@ -47,25 +50,9 @@ namespace Api_Labodeguita.net.Controllers
         {
             try
             {
-                 Console.WriteLine("MODEL STATE: " + ModelState.IsValid);
-                
-                foreach (var kvp in ModelState)
-                {
-                    foreach (var error in kvp.Value.Errors)
-                    {
-                        Console.WriteLine($"ModelState Error - Campo: {kvp.Key} | Error: {error.ErrorMessage}");
-                    }
-                } 
-                if (ModelState.IsValid)
-                {
-                    contexto.Add(pago);
-                    await contexto.SaveChangesAsync();
-                    return CreatedAtAction(nameof(GetPago), new { id = pago.Id }, pago);
-                }
-                else
-                {
-                    return BadRequest("Model state no es valido");
-                }
+                contexto.Add(pago);
+                await contexto.SaveChangesAsync();
+                return CreatedAtAction(nameof(GetPago), new { id = pago.Id }, pago);
                  
             }catch(Exception ex)
             {
@@ -94,10 +81,7 @@ namespace Api_Labodeguita.net.Controllers
                         pedido.Pago.Direccion = pedido.DireccionEntrega;
                          listaEnviar.Add(pedido.Pago);
                     }
-                }
-                
-                
-                
+                }              
                 return Ok(listaEnviar);
             }
             catch (Exception ex)

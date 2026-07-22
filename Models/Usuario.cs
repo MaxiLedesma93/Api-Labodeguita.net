@@ -12,20 +12,22 @@ namespace Api_Labodeguita.net.Models{
 
         [Required, Display(Name = "Cliente")]
         public string Nombre { get; set; }
-        [Required]
+        [Required (ErrorMessage = "El apellido es obligatorio.")]
         public string Apellido { get; set; }
-        [Required]
+        [Required (ErrorMessage = "El mail es obligatorio.")]
         public string Email { get; set; }
 
-        [Required]
+        [Required (ErrorMessage = "La dirección es obligatoria.")]
         public string Direccion { get; set; }
 
-        [Required]
+        [Required (ErrorMessage = "El teléfono es obligatorio.")]
         public string Telefono { get; set; }
 
+        [Required]
         public bool Estado { get; set; }
+        [Required]
         public string Clave { get; set; }
-
+        [Required]
         public string Rol { get; set; }
    }
 }

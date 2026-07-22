@@ -1,4 +1,6 @@
 using Api_Labodeguita.net.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -7,8 +9,9 @@ using System.Linq;
 
 namespace Api_Labodeguita.net.Controllers
 {
+    [ApiController]
     [Route("[controller]")]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 
     public class DetalleController : ControllerBase
     {
@@ -71,26 +74,9 @@ namespace Api_Labodeguita.net.Controllers
         {
             try
             {
-                Console.WriteLine("MODEL STATE: " + ModelState.IsValid);
-                
-                foreach (var kvp in ModelState)
-                {
-                    foreach (var error in kvp.Value.Errors)
-                    {
-                        Console.WriteLine($"ModelState Error - Campo: {kvp.Key} | Error: {error.ErrorMessage}");
-                    }
-                } 
-                
-                if (ModelState.IsValid)
-                {
-                    contexto.Add(detalle);
-                    await contexto.SaveChangesAsync();
-                    return CreatedAtAction(nameof(GetDetalle), new { id = detalle.Id }, detalle);
-                }
-                else
-                {
-                    return BadRequest("Model state no es valido");
-                }
+               contexto.Add(detalle);
+               await contexto.SaveChangesAsync();
+               return CreatedAtAction(nameof(GetDetalle), new { id = detalle.Id }, detalle);
                  
             }catch(Exception ex)
             {
@@ -124,36 +110,15 @@ namespace Api_Labodeguita.net.Controllers
         {
             try
             {
-                Console.WriteLine("MODEL STATE: " + ModelState.IsValid);
-                
-                foreach (var kvp in ModelState)
-                {
-                    foreach (var error in kvp.Value.Errors)
-                    {
-                        Console.WriteLine($"ModelState Error - Campo: {kvp.Key} | Error: {error.ErrorMessage}");
-                    }
-                } 
-                
-                if (ModelState.IsValid)
-                {
-                    contexto.Update(detalle);
-                    await contexto.SaveChangesAsync();
-                    return Ok();
-                }
-                else
-                {
-                    return BadRequest("Model state no es valido");
-                }
+                contexto.Update(detalle);
+                await contexto.SaveChangesAsync();
+                return Ok();
                  
             }catch(Exception ex)
             {
                 return BadRequest(ex.InnerException?.Message ?? ex.Message);
             }
         }
-
-
-
-
         #endregion
     }
 }

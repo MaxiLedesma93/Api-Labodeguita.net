@@ -12,8 +12,10 @@ namespace Api_Labodeguita.net.Models
         [Required]
         public int PedidoId { get; set; }
 
+        [Required]
         public String MetodoDePago  { get; set; }
         
+        [Required]
         public double Importe {get; set;}
         [NotMapped]
         public String? Direccion{get; set;}

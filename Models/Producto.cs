@@ -16,18 +16,22 @@ namespace Api_Labodeguita.net.Models{
         [Required]
         public double Precio { get; set; }
 
+        [Required]
         public bool Estado { get; set; }
-
+        [Required]
         public string? Foto { get; set; }
 
         [NotMapped]
 		public IFormFile? Imagen { get; set;}
 
+        [Required (ErrorMessage = "La descripción es obligatoria.")]
         public string Descripcion {get; set;}
 
+        [Required]
         public int? IdTipo {get; set;}
         [NotMapped]
 
+        [Required]
         public string? TipoProducto {get; set;}
 
         [NotMapped]

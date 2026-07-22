@@ -18,8 +18,9 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Api_Labodeguita.net.Controllers
 {
+    [ApiController]
     [Route("[controller]")]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 
     public class ProductoController : ControllerBase
     {
@@ -81,7 +82,6 @@ namespace Api_Labodeguita.net.Controllers
                     // Esto NO causará 'unexpected end of stream'. Retrofit lo interpretará
                     // como un error HTTP y podrás manejarlo en el callback onFailure.
                     return StatusCode(500, $"Error interno del servidor: {ex.Message}");
-                //return BadRequest(ex.Message.ToString());
             }
         }
 
@@ -92,7 +92,6 @@ namespace Api_Labodeguita.net.Controllers
             try
             {
                 producto.Foto = "Sin foto";
-                //producto.IdTipo = 0;
                  Console.WriteLine("MODEL STATE: " + ModelState.IsValid);
                 
                     foreach (var kvp in ModelState)
@@ -102,8 +101,7 @@ namespace Api_Labodeguita.net.Controllers
                             Console.WriteLine($"ModelState Error - Campo: {kvp.Key} | Error: {error.ErrorMessage}");
                         }
                     } 
-                if (ModelState.IsValid)
-                {
+            
                     //aca deberiamos agregar el idTipo al producto, de acuerdo a la descTipo que viene de
                     // la vista. buscandola en la tabla de tipos por descripcion.
                    var tipo = await contexto.Tipo.SingleOrDefaultAsync(x => x.Descripcion == producto.TipoProducto);
@@ -122,11 +120,6 @@ namespace Api_Labodeguita.net.Controllers
                     }
                     
                     return CreatedAtAction(nameof(GetProducto), new { id = producto.Id }, producto);
-                }
-                else
-                {
-                    return BadRequest("Model State no es valido.");
-                }
             }
             catch (Exception ex)
             {
@@ -147,9 +140,7 @@ namespace Api_Labodeguita.net.Controllers
                     }
 
                 Producto productoBD = await contexto.Producto.AsNoTracking().FirstOrDefaultAsync(x => x.Id == p.Id);
-                // productoBD.Nombre = p.Nombre;
-                // productoBD.Precio = p.Precio;
-                // productoBD.Estado = p.Estado;
+                
                 if (p.Imagen != null)
                 {
                     var imagePath = await guardarImagen(p);
@@ -171,16 +162,7 @@ namespace Api_Labodeguita.net.Controllers
                         Console.WriteLine($"ModelState Error - Campo: {kvp.Key} | Error: {error.ErrorMessage}");
                     }
                 } 
-                if (ModelState.IsValid){ 
-                    Console.WriteLine($"-------precio del producto = {p.Precio}");
-					contexto.Producto.Update(p);
-					await contexto.SaveChangesAsync();
-					return Ok(p);
-				}
-                return BadRequest();
-                
-                
-                
+                return BadRequest();               
             }
             catch (Exception ex)
             {
