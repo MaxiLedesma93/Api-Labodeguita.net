@@ -18,7 +18,7 @@ namespace Api_Labodeguita.net.Models{
 
         [Required]
         public bool Estado { get; set; }
-        [Required]
+        
         public string? Foto { get; set; }
 
         [NotMapped]
@@ -27,11 +27,10 @@ namespace Api_Labodeguita.net.Models{
         [Required (ErrorMessage = "La descripción es obligatoria.")]
         public string Descripcion {get; set;}
 
-        [Required]
+        
         public int? IdTipo {get; set;}
-        [NotMapped]
 
-        [Required]
+        [NotMapped]
         public string? TipoProducto {get; set;}
 
         [NotMapped]

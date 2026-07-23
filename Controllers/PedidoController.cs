@@ -172,11 +172,7 @@ namespace Api_Labodeguita.net.Controllers
 //authorize con rol 
         [HttpPatch("CambiarEstadoPedido")]
         [Authorize]
-<<<<<<< Updated upstream
         public async Task<ActionResult> CambiarEstadoPedido([FromForm] int idPedido, [FromForm] int idEstado)
-=======
-        public async Task<ActionResult> CambiarEstadoPedido([FromForm] int idPedido,[FromForm] int idEstado)
->>>>>>> Stashed changes
         {
             try
             {
