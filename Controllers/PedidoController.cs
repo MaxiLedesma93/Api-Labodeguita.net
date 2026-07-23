@@ -172,7 +172,7 @@ namespace Api_Labodeguita.net.Controllers
 //authorize con rol 
         [HttpPatch("CambiarEstadoPedido")]
         [Authorize]
-        public async Task<ActionResult> CambiarEstadoPedido([FromForm] int idPedido, int idEstado)
+        public async Task<ActionResult> CambiarEstadoPedido([FromForm] int idPedido, [FromForm] int idEstado)
         {
             try
             {
