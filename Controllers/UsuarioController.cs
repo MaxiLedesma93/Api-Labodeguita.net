@@ -74,7 +74,7 @@ namespace Api_Labodeguita.net.Controllers
         //localhost:5000/usuario/registrar
         [HttpPost("Registrar")]
         [AllowAnonymous]
-        public async Task<IActionResult> Nuevo([FromForm] Usuario usuario)
+        public async Task<IActionResult> Nuevo([FromBody] Usuario usuario)
         {
             try
             {

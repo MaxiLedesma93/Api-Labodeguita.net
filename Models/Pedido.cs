@@ -16,8 +16,7 @@ namespace Api_Labodeguita.net.Models
         public DateTime Fecha { get; set; }
 
         public Usuario? Cliente { get; set; }
-
-        [Required(ErrorMessage = "El estado del pedido es obligatorio.")]
+        
         public int EstadoId { get; set; }
 
         public Estado? Estado { get; set; }

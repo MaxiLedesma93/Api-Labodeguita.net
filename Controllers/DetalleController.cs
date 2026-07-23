@@ -67,16 +67,31 @@ namespace Api_Labodeguita.net.Controllers
                 return BadRequest(ex.Message.ToString());
             }
         }
-        //fijarse q el estado del pedido no sea distinto a recibido.
+        
         [HttpPost("GuardarDetalle")]
-        public async Task<IActionResult> GuardarDetalle([FromForm] Detalle detalle)
+        public async Task<IActionResult> GuardarDetalle([FromBody] Detalle detalle)
 
         {
             try
             {
-               contexto.Add(detalle);
-               await contexto.SaveChangesAsync();
-               return CreatedAtAction(nameof(GetDetalle), new { id = detalle.Id }, detalle);
+                var pedido = await contexto.Pedido.SingleOrDefaultAsync(x => x.Id == detalle.PedidoId);
+                var emailUsuario = User.Identity.Name;
+                var cliente = await contexto.Usuario.SingleOrDefaultAsync(x => x.Email == emailUsuario);
+
+                
+                //Validamos que el pedido al que pertenece el detalle este en estado "Recibido" id = 1;
+                //Validamos que el usuario que edita el pedido sea el mismo que creo el pedido.
+                if (pedido.EstadoId == 1 && pedido.ClienteId == cliente.Id)
+                {
+                    contexto.Add(detalle);
+                    await contexto.SaveChangesAsync();
+                    return CreatedAtAction(nameof(GetDetalle), new { id = detalle.Id }, detalle);
+                }
+                else{
+                    return BadRequest("No se puede editar un pedido que este en Preparacion o sea de otro Usuario");
+                }
+               
+               
                  
             }catch(Exception ex)
             {
@@ -84,7 +99,7 @@ namespace Api_Labodeguita.net.Controllers
             }
         }
         
-         [HttpDelete("borrardetalle/{id}")]
+        [HttpDelete("borrardetalle/{id}")]
         //localhost/detalle/${id}
         public async Task<ActionResult> BorrarDetalle(int id)
         {
@@ -94,29 +109,19 @@ namespace Api_Labodeguita.net.Controllers
                 if(detalle != null)
                 {
                      contexto.Detalle.Remove(detalle);
+                     contexto.SaveChangesAsync();
+                     return Ok();
                 }
-                contexto.SaveChanges();
-                return Ok();
+                else
+                {
+                    return BadRequest("No se encontro detalle para el pedido.");
+                }
+                
+                
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message.ToString());
-            }
-        }
-        //fijarse q el estado del pedido no sea distinto a recibido.
-         [HttpPatch("EditarDetalle")]
-        public async Task<IActionResult> EditarDetalle([FromForm] Detalle detalle)
-
-        {
-            try
-            {
-                contexto.Update(detalle);
-                await contexto.SaveChangesAsync();
-                return Ok();
-                 
-            }catch(Exception ex)
-            {
-                return BadRequest(ex.InnerException?.Message ?? ex.Message);
             }
         }
         #endregion
