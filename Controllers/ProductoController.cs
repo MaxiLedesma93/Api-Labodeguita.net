@@ -64,7 +64,7 @@ namespace Api_Labodeguita.net.Controllers
                 
                 var tipo = await contexto.Tipo.SingleOrDefaultAsync(x=> x.Descripcion == tipoProducto);
                 
-                var lista =  await contexto.Producto.Where(x => x.Estado == true && x.IdTipo== tipo.Id ).ToListAsync();
+                var lista =  await contexto.Producto.Where(x => x.Estado == true && x.IdTipo== tipo.Id ).OrderBy(x => x.Nombre).ToListAsync();
                 
 
                 return Ok(lista);
