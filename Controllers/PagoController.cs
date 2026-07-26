@@ -45,7 +45,7 @@ namespace Api_Labodeguita.net.Controllers
             }
         }
         [HttpPost("RegistrarPago")]
-        public async Task<IActionResult> RegistrarPago([FromForm] Pago pago)
+        public async Task<IActionResult> RegistrarPago([FromBody] Pago pago)
 
         {
             try

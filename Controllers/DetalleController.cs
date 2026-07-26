@@ -106,11 +106,22 @@ namespace Api_Labodeguita.net.Controllers
             try
             {
                 var detalle = await contexto.Detalle.SingleOrDefaultAsync(x => x.Id == id);
+                var emailUsuario = User.Identity.Name;
+                var cliente = await contexto.Usuario.SingleOrDefaultAsync(x => x.Email == emailUsuario);
                 if(detalle != null)
                 {
-                     contexto.Detalle.Remove(detalle);
-                     contexto.SaveChangesAsync();
-                     return Ok();
+                    var pedido = await contexto.Pedido.SingleOrDefaultAsync(x => x.Id == detalle.PedidoId);
+                    if(pedido.EstadoId == 1 && pedido.ClienteId == cliente.Id)
+                    {
+                        contexto.Detalle.Remove(detalle);
+                        await contexto.SaveChangesAsync();
+                        return Ok();
+                    }
+                        
+                        else
+                    {
+                        return BadRequest("No tiene permiso para eliminar el detalle");
+                    }
                 }
                 else
                 {

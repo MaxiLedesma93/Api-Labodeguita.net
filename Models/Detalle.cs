@@ -9,8 +9,8 @@ namespace Api_Labodeguita.net.Models
         [Display(Name = "Codigo Detalle")]
         public int Id { get; set; }
         
-        [Required, Display(Name ="Pedido")]
-        public int PedidoId { get; set; }
+        [Display(Name ="Pedido")]
+        public int? PedidoId { get; set; }
        
         [Required, Display(Name = "Producto")]
         public int ProductoId { get; set; }

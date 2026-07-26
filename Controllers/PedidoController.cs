@@ -246,19 +246,41 @@ namespace Api_Labodeguita.net.Controllers
        
         [HttpPost("GuardarPedido")]
         public async Task<IActionResult> GuardarPedido([FromBody] Pedido pedido)
-
         {
             try
             {
-
+                var importe = 0.0;
                 var emailUsuario = User.Identity.Name;
                 var cliente = await contexto.Usuario.SingleOrDefaultAsync(x => x.Email == emailUsuario);
                 //asignamos el Id del cliente con el id del usuario logueado/autenticado.
                 pedido.ClienteId = cliente.Id;
                 pedido.EstadoId = 1;
-                    contexto.Add(pedido);
-                    await contexto.SaveChangesAsync();
-                    return CreatedAtAction(nameof(GetPedido), new { id = pedido.Id }, pedido);
+                pedido.ImporteTotal= 0.0;
+                //contexto.Pedido.Add(pedido);
+                //contexto.Pedido.Add(pedido);
+                
+                
+                var importeTotal = 0.0;
+               
+                foreach(var detalle in pedido.Detalles)
+                {
+                
+                    var producto = await contexto.Producto.FindAsync(detalle.ProductoId);
+                    if (producto != null)
+                        {
+                            importeTotal += detalle.Cantidad * producto.Precio;
+                        
+                            detalle.Producto = null; 
+                        }
+                }
+        
+                pedido.ImporteTotal = importeTotal;
+
+                contexto.Pedido.Add(pedido);
+                await contexto.SaveChangesAsync();
+                
+
+            return CreatedAtAction(nameof(GetPedido), new { id = pedido.Id }, pedido);
             
                  
             }catch(Exception ex)
@@ -282,29 +304,72 @@ namespace Api_Labodeguita.net.Controllers
                 var cliente = await contexto.Usuario.SingleOrDefaultAsync(x => x.Email == emailUsuario);
                 //
                 
-                Pedido pedidoBD = await contexto.Pedido.AsNoTracking().FirstOrDefaultAsync(x => x.Id == p.Id);
-               /* foreach (var kvp in ModelState)
-                {
-                    foreach (var error in kvp.Value.Errors)
-                    {
-                        Console.WriteLine($"ModelState Error - Campo: {kvp.Key} | Error: {error.ErrorMessage}");
-                    }
-                }  */
-            
+                Pedido pedidoBD = await contexto.Pedido.Include(x => x.Detalles).FirstOrDefaultAsync(x => x.Id == p.Id);
+               
+
                 //validar q el usuario sea el mismo que edita.
-                if (pedidoBD.ClienteId == cliente.Id)
+                if (pedidoBD.ClienteId == cliente.Id && pedidoBD.EstadoId == 1)
                 {
+                    
                     pedidoBD.Delivery = p.Delivery;
                     pedidoBD.DireccionEntrega = p.DireccionEntrega;
                     pedidoBD.Fecha = p.Fecha;
-                    pedidoBD.ImporteTotal = p.ImporteTotal;
-                    contexto.Pedido.Update(pedidoBD);
+                    
+                    var importeTotal = 0.0;
+
+                    contexto.Detalle.RemoveRange(pedidoBD.Detalles);
+                    pedidoBD.Detalles.Clear();
+                    foreach(var detalle in p.Detalles)
+                    {
+                    
+                        var producto = await contexto.Producto.FindAsync(detalle.ProductoId);
+                        if (producto != null)
+                            {
+                                importeTotal += detalle.Cantidad * producto.Precio;
+                                 
+                                detalle.Producto = null; 
+                                pedidoBD.Detalles.Add(new Detalle {
+                                    ProductoId = detalle.ProductoId,
+                                    Cantidad = detalle.Cantidad,
+                                    PedidoId = pedidoBD.Id
+                                });
+                            } 
+                    }
+            
+                    pedidoBD.ImporteTotal = importeTotal;
+        
                     await contexto.SaveChangesAsync();
                     return Ok(p);
                 }else{
                     return BadRequest("No tiene permiso para editar este pedido.");
                     }
                 
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message.ToString());
+            }
+        }
+        [HttpPatch("CancelarPedido/{id}")]
+        [Authorize]
+        public async Task<ActionResult> CancelarPedido(int id)
+        {
+            try
+            {
+               
+                var pedido = await contexto.Pedido
+                                    .Include(x => x.Cliente)
+                                    .SingleOrDefaultAsync(x => x.Id == id);
+                var email = User.Identity.Name;
+                var usuario = await contexto.Usuario.SingleOrDefaultAsync(x => x.Email == email);
+                if (pedido != null && pedido.ClienteId == usuario.Id )
+                {
+                    pedido.EstadoId = 4;
+                    contexto.Pedido.Update(pedido);
+                    await contexto.SaveChangesAsync();
+                    return Ok();
+                }
+                else { return BadRequest("No se encontró el pedido/ No tiene permiso para cancelarlo"); }
             }
             catch (Exception ex)
             {

@@ -28,8 +28,8 @@ namespace Api_Labodeguita.net.Models
         public bool Delivery {get; set;}
         [Required(ErrorMessage = "La direccion es obligatoria.")]
         public string DireccionEntrega {get; set;}
-        [Required(ErrorMessage = "Importe es obligatorio.")]
-        public double ImporteTotal { get; set; }
+        
+        public double? ImporteTotal { get; set; }
 
 
     }
