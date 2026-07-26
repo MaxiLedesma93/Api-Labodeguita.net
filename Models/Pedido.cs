@@ -21,7 +21,9 @@ namespace Api_Labodeguita.net.Models
 
         public Estado? Estado { get; set; }
 
-        public Pago? Pago {get; set;}
+        [NotMapped]
+
+        public List<Pago>? Pagos {get; set;}
 
 
         public List<Detalle>? Detalles { get; set; }

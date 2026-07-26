@@ -72,15 +72,19 @@ namespace Api_Labodeguita.net.Controllers
                 DateTime fechaConvertida = DateTime.ParseExact(Fecha, formato, CultureInfo.InvariantCulture);
                 Console.WriteLine(fechaConvertida);
                 var listaPedidos = await contexto.Pedido
-                .Include(x => x.Pago)
                 .Where(x => x.Fecha == fechaConvertida && x.EstadoId == 1).ToListAsync();
                 var listaEnviar = new List<Pago>();
                 foreach (Pedido pedido in listaPedidos) {
-                    if(pedido.Pago != null)
+                    var listaPagosxPedido = await contexto.Pago.Where(x => x.PedidoId == pedido.Id).ToListAsync();
+                    foreach(Pago pago in listaPagosxPedido)
                     {
-                        pedido.Pago.Direccion = pedido.DireccionEntrega;
-                         listaEnviar.Add(pedido.Pago);
+                         if(pago != null)
+                        {
+                            pago.Direccion = pedido.DireccionEntrega;
+                            listaEnviar.Add(pago);
+                        }
                     }
+                   
                 }              
                 return Ok(listaEnviar);
             }
