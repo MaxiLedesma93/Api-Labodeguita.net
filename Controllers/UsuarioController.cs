@@ -42,18 +42,14 @@ namespace Api_Labodeguita.net.Controllers
         [Authorize]
         public async Task<ActionResult> GetUsuario(int id)
         {
-
             try
             {
                 var usuario = await contexto.Usuario.SingleOrDefaultAsync(x => x.Id == id);
-
-
                 return usuario != null ? Ok(usuario) : NotFound();
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message.ToString());
-
             }
         }
 
@@ -77,8 +73,7 @@ namespace Api_Labodeguita.net.Controllers
         public async Task<IActionResult> Nuevo([FromBody] Usuario usuario)
         {
             try
-            {
-               
+            {              
                 //verificamos si existe un usuario logueado
                 if(User.Identity.IsAuthenticated)
                 {   
@@ -90,8 +85,7 @@ namespace Api_Labodeguita.net.Controllers
                     if (User.IsInRole("Recepcionista"))
                     {
                         usuario.Rol = "Recepcionista";
-                    }
-                  
+                    }                
                 }
                 else
                 {

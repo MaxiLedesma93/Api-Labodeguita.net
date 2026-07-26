@@ -1,4 +1,5 @@
 using Api_Labodeguita.net.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,9 +10,9 @@ using System.Linq;
 
 namespace Api_Labodeguita.net.Controllers
 {
-    //[ApiController]
+    [ApiController]
     [Route("[controller]")]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 
     public class PedidoController : ControllerBase
     {
@@ -104,13 +105,11 @@ namespace Api_Labodeguita.net.Controllers
                                 }
                             }
                     if (listaP != null)
-                    {
-                         
+                    {                        
                         return Ok(listaP);
                     }
                     else
-                    {
-                        
+                    {                        
                         return NotFound();
                     }
                 }
@@ -157,8 +156,7 @@ namespace Api_Labodeguita.net.Controllers
                     return Ok(listaP);
                 }
                 else
-                {
-                    
+                {                  
                     return NotFound();
                 }
             }
@@ -168,9 +166,8 @@ namespace Api_Labodeguita.net.Controllers
             }
         }
 
-//authorize con rol 
         [HttpPatch("CambiarEstadoPedido")]
-        [Authorize]
+        [Authorize(Policy = "Recepcionista")]
         public async Task<ActionResult> CambiarEstadoPedido([FromForm] int idPedido, [FromForm] int idEstado)
         {
             try
@@ -180,11 +177,8 @@ namespace Api_Labodeguita.net.Controllers
                 var pedido = await contexto.Pedido
                                     .Include(x => x.Cliente)
                                     .SingleOrDefaultAsync(x => x.Id == idPedido);
-               // var detalles = await contexto.Detalle.Where(x => x.PedidoId == idPedido).ToListAsync();
-                //pedido.Detalles = detalles;
                 
-                
-
+            
                 if (pedido != null)
                 {
                     var detalles = await contexto.Detalle.Where(x => x.PedidoId == pedido.Id).ToListAsync();
@@ -210,7 +204,7 @@ namespace Api_Labodeguita.net.Controllers
         }
         
         [HttpGet("ListaPedidosPorFecha/{Fecha}")]
-        [Authorize]
+        [Authorize(Policy = "Recepcionista")]
         public async Task<ActionResult<List<Pedido>>> ListaPedidosPorFecha(DateTime Fecha)
         {
             try
@@ -233,7 +227,6 @@ namespace Api_Labodeguita.net.Controllers
                 }
                 else
                 {
-                    //!ver como devolver un mensaje de no hay registros
                     return NotFound();
                 }
             }
@@ -244,6 +237,7 @@ namespace Api_Labodeguita.net.Controllers
         }
        
         [HttpPost("GuardarPedido")]
+        [Authorize(Policy = "Cliente")]
         public async Task<IActionResult> GuardarPedido([FromBody] Pedido pedido)
         {
             try
@@ -255,8 +249,6 @@ namespace Api_Labodeguita.net.Controllers
                 pedido.ClienteId = cliente.Id;
                 pedido.EstadoId = 1;
                 pedido.ImporteTotal= 0.0;
-                //contexto.Pedido.Add(pedido);
-                //contexto.Pedido.Add(pedido);
                 
                 
                 var importeTotal = 0.0;
@@ -294,6 +286,7 @@ namespace Api_Labodeguita.net.Controllers
 
         //filtrar solo para cliente. fijarse q el estado del pedido no sea distinto a recibido.
         [HttpPatch("EditarPedido")]
+        [Authorize(Policy = "Cliente")]
         //Editar producto
         public async Task<IActionResult> EditarPedido([FromBody] Pedido p)
         {
@@ -350,7 +343,7 @@ namespace Api_Labodeguita.net.Controllers
             }
         }
         [HttpPatch("CancelarPedido/{id}")]
-        [Authorize]
+        [Authorize(Policy = "Cliente")]
         public async Task<ActionResult> CancelarPedido(int id)
         {
             try

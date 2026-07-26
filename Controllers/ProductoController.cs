@@ -39,6 +39,7 @@ namespace Api_Labodeguita.net.Controllers
 
         #region EndPoints
         [HttpGet("{id}")]
+        [Authorize]
         //localhost/producto/${id}
         //obtiene un producto por id
         public async Task<ActionResult> GetProducto(int id)
@@ -56,6 +57,7 @@ namespace Api_Labodeguita.net.Controllers
         }
 
         [HttpGet ("listar/{tipoProducto}")]
+        [Authorize]
         //Obtiene una lista de productos
         public async Task<ActionResult<List<Producto>>> ListaProductos(string tipoProducto)
         {
@@ -86,6 +88,7 @@ namespace Api_Labodeguita.net.Controllers
         }
 
         [HttpPost("GuardarProducto")]
+        [Authorize(Policy = "Recepcionista")]
         //Alta producto
         public async Task<IActionResult> GuardarProducto([FromForm] Producto producto)
         {
@@ -128,7 +131,7 @@ namespace Api_Labodeguita.net.Controllers
         }
 
         [HttpPatch("EditarProducto")]
-        //Editar producto
+        [Authorize(Policy = "Recepcionista")]
         public async Task<IActionResult> Patch([FromForm] Producto p)
         {
             try
@@ -145,24 +148,21 @@ namespace Api_Labodeguita.net.Controllers
                 {
                     var imagePath = await guardarImagen(p);
                     p.Foto = imagePath;
-                    await contexto.SaveChangesAsync();
+                    
                     //seteo null la imagen para evitar un error de que llega un objeto cuando espera un array el retrofit.
                     p.Imagen = null;
+                    contexto.Producto.Update(p);
+                    await contexto.SaveChangesAsync();
+                    return Ok(p);
                 }
                 else
                 {
                     p.Foto = productoBD.Foto;
+                    contexto.Producto.Update(p);
+                    await contexto.SaveChangesAsync();
+                    return Ok(p);
                 }
-                 Console.WriteLine("MODEL STATE: " + ModelState.IsValid);
-                
-                foreach (var kvp in ModelState)
-                {
-                    foreach (var error in kvp.Value.Errors)
-                    {
-                        Console.WriteLine($"ModelState Error - Campo: {kvp.Key} | Error: {error.ErrorMessage}");
-                    }
-                } 
-                return BadRequest();               
+                           
             }
             catch (Exception ex)
             {
