@@ -62,9 +62,9 @@ builder.Services.AddAuthentication().AddJwtBearer(options =>//la api web valida 
 builder.Services.AddAuthorization(options =>
 {
 	options.AddPolicy("Cliente", policy =>
-		policy.RequireClaim(ClaimTypes.Role, "Cliente"));
+		policy.RequireRole("Cliente"));
 	options.AddPolicy("Recepcionista", policy =>
-		policy.RequireClaim(ClaimTypes.Role, "Recepcionista"));
+		policy.RequireRole("Recepcionista"));
 
 });
 var app = builder.Build();

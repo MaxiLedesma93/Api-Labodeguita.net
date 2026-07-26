@@ -54,9 +54,8 @@ namespace Api_Labodeguita.net.Controllers
         }
 
         [HttpGet("ListarPedidos/{idEstado}")]
-        [Authorize]
-        //Lo usa la recepcionista, devuelve una lista de todos los pedidos
-        //que esten en estado = "Recibido", "En Preparación", "Terminado"
+        [Authorize(Policy = "Recepcionista")]
+        
         public async Task<ActionResult<List<Pedido>>> ListaPedidos(int idEstado)
         {
             try
@@ -125,7 +124,7 @@ namespace Api_Labodeguita.net.Controllers
 
         //lista los pedidos al usuario logueado
         [HttpGet("ListarPedidosDeUsuario")]
-        [Authorize]
+        [Authorize(Policy = "Cliente")]
         public async Task<ActionResult<List<Pedido>>> ListaPedidosPorUsuario()
         {
             try
@@ -159,7 +158,7 @@ namespace Api_Labodeguita.net.Controllers
                 }
                 else
                 {
-                    //!ver como devolver un mensaje de no hay registros
+                    
                     return NotFound();
                 }
             }
