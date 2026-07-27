@@ -1,11 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
-
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Api_Labodeguita.net</RootNamespace>
-    <UserSecretsId>e9988ce6-0344-4bf2-bc9c-15f6fb861eb3</UserSecretsId>
+    <UserSecretsId>d11559d9-deee-4e01-9ded-880b69606e71</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
