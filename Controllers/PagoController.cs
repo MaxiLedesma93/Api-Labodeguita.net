@@ -31,6 +31,7 @@ namespace Api_Labodeguita.net.Controllers
 
         #region EndPoints
         [HttpGet("{id}")]
+        [Authorize]
         //localhost/pago/${id}
         public async Task<ActionResult> GetPago(int id)
         {
@@ -45,6 +46,7 @@ namespace Api_Labodeguita.net.Controllers
             }
         }
         [HttpPost("RegistrarPago")]
+        [Authorize]
         public async Task<IActionResult> RegistrarPago([FromBody] Pago pago)
 
         {
@@ -60,6 +62,7 @@ namespace Api_Labodeguita.net.Controllers
             } 
         }
         [HttpGet("TotalFacturadoFecha/{fecha}")]
+        [Authorize(Policy = "Recepcionista")]
         //localhost/pago/${id}
         public async Task<ActionResult> TotalFacturadoFecha(String Fecha)
         {
@@ -87,6 +90,20 @@ namespace Api_Labodeguita.net.Controllers
                    
                 }              
                 return Ok(listaEnviar);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message.ToString());
+            }
+        }
+        [HttpGet("ObtenerPagosPorPedido/{idPedido}")]
+        [Authorize(Policy = "Recepcionista")]
+        public async Task<ActionResult> ObtenerPagosPorPedido(int idPedido)
+        {
+            try
+            {
+                var pagos = await contexto.Pago.Where(x => x.PedidoId == idPedido).ToListAsync();
+                return pagos != null ? Ok(pagos) : NotFound();
             }
             catch (Exception ex)
             {

@@ -11,6 +11,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Text;
+using Api_Labodeguita.net.Servicios;
+using MimeKit;
+using MailKit.Net.Smtp;
+using System.Security.Cryptography;
 
 
 
@@ -96,12 +101,7 @@ namespace Api_Labodeguita.net.Controllers
                         .FirstOrDefaultAsync(x => x.Email == usuario.Email);
                     if(usuarioExistente == null || usuarioExistente.Estado == false)
                         {
-                        usuario.Clave = Convert.ToBase64String(KeyDerivation.Pbkdf2(
-                            password: usuario.Clave,
-                            salt: System.Text.Encoding.ASCII.GetBytes(config["Salt"]),
-                            prf: KeyDerivationPrf.HMACSHA1,
-                            iterationCount: 1000,
-                            numBytesRequested: 256 / 8));
+                        usuario.Clave = HashearClave(usuario.Clave);
                         usuario.Estado = true;
                         contexto.Usuario.Add(usuario);
                         await contexto.SaveChangesAsync();
@@ -160,12 +160,7 @@ namespace Api_Labodeguita.net.Controllers
             {
                
 
-                string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
-                    password: login.Clave,
-                    salt: System.Text.Encoding.ASCII.GetBytes(config["Salt"]),
-                    prf: KeyDerivationPrf.HMACSHA1,
-                    iterationCount: 1000,
-                    numBytesRequested: 256 / 8));
+                string hashed = HashearClave(login.Clave);
                  u = await contexto.Usuario.FirstOrDefaultAsync(x => x.Email== login.Email);
                 if (u == null || u.Clave != hashed)
                 {
@@ -200,6 +195,173 @@ namespace Api_Labodeguita.net.Controllers
             {
                 return BadRequest(ex.Message.ToString());
             }
-        }          
+        } 
+        [HttpPatch("cambiarClave")]
+		public async Task<IActionResult> CambiarPass([FromForm] string clVieja, [FromForm]string clNueva ){
+		
+			var user = User.Identity.Name;
+            var usuario = await contexto.Usuario.FirstOrDefaultAsync(u=>u.Email==user);
+			string hashed =  HashearClave(clVieja);
+			try{
+                if(usuario.Clave==hashed){
+                    clNueva = HashearClave(clNueva);
+                    usuario.Clave = clNueva;
+                    contexto.Usuario.Update(usuario);
+                    await contexto.SaveChangesAsync();
+                    
+                }
+            
+                return Ok(usuario);
+            }catch(Exception ex){
+                return BadRequest(ex.Message.ToString());
+            }
+		}
+
+
+        // POST api/<controller>/email
+        [HttpPost("email/{email}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetByEmail(string email)
+        {
+            try
+            {
+                var entidad = await contexto.Usuario.FirstOrDefaultAsync(x => x.Email == email);
+                
+                // Evita NullReferenceException y previene adivinación de correos
+                if (entidad == null)
+                {
+                    return Ok(new { message = "Si el correo existe, se enviará un enlace de recuperación." });
+                }
+
+                var key = new SymmetricSecurityKey(
+                    Encoding.ASCII.GetBytes(config["TokenAuthentication:SecretKey"]));
+                var credenciales = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+                
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, entidad.Email),
+                    new Claim("FullName", $"{entidad.Nombre} {entidad.Apellido}"),
+                    new Claim(ClaimTypes.Role, "Propietario"),
+                    new Claim("Purpose", "PasswordReset") // Claim de seguridad adicional
+                };
+
+                // Reducimos el tiempo de vida a 15 minutos
+                var token = new JwtSecurityToken(
+                    issuer: config["TokenAuthentication:Issuer"],
+                    audience: config["TokenAuthentication:Audience"],
+                    claims: claims,
+                    expires: DateTime.UtcNow.AddMinutes(15), 
+                    signingCredentials: credenciales
+                );
+
+                var vToken = new JwtSecurityTokenHandler().WriteToken(token);
+                var url = this.GenerarUrlCompleta("Token", "Usuario", environment);
+                var dominio = $"{url}?access_token={vToken}";
+
+                var message = new MimeMessage();
+                message.To.Add(new MailboxAddress(entidad.Nombre, entidad.Email));
+                message.From.Add(new MailboxAddress("La Bodeguita", config["SMTPUser"]));
+                message.Subject = "Link para resetear contraseña";
+                message.Body = new TextPart("html")
+                {
+                    Text = $@"<h1>Hola, {entidad.Nombre}</h1>
+                            <p>Haz <a href='{dominio}'>click aquí</a> para resetear tu contraseña.</p>
+                            <p>Este enlace expira en 15 minutos.</p>"
+                };
+               
+
+                // Bloque 'using' para cerrar la conexión SMTP correctamente
+                using var client = new SmtpClient();
+                await client.ConnectAsync("smtp.gmail.com", 465, MailKit.Security.SecureSocketOptions.SslOnConnect);
+                await client.AuthenticateAsync(config["SMTPUser"], config["SMTPPass"]);
+                await client.SendAsync(message);
+                await client.DisconnectAsync(true);
+
+                return Ok(new { message = "Correo enviado con éxito." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        // GET api/<controller>/token
+        [HttpGet("token")]
+        [Authorize] // Asegúrate de incluir el atributo explícito de autorización
+        public async Task<IActionResult> Token()
+        {
+            try
+            {
+                var email = User.Identity?.Name;
+                var nombre = User.Claims.FirstOrDefault(x => x.Type == "FullName")?.Value;
+
+                if (string.IsNullOrEmpty(email))
+                    return Unauthorized();
+
+                // Generamos la clave aleatoriamente.
+                string randomChars = "ABCDEFGHJKLMNOPQRSTUVWXYZ0123456789";
+                char[] claveChars = new char[6];
+                for (int i = 0; i < 6; i++)
+                {
+                    claveChars[i] = randomChars[RandomNumberGenerator.GetInt32(0, randomChars.Length)];
+                }
+                string nuevaClave = new string(claveChars);
+                //hasheamos la nueva clave.
+                var claveHasheada = HashearClave(nuevaClave);
+                
+                Usuario u = await contexto.Usuario.SingleOrDefaultAsync(x => x.Email == email);
+                if (u == null) return NotFound("Usuario no encontrado.");
+
+                u.Clave = claveHasheada;
+                contexto.Usuario.Update(u);
+                await contexto.SaveChangesAsync(); 
+
+                var message = new MimeMessage();
+                message.To.Add(new MailboxAddress(nombre ?? "Usuario", email));
+                message.From.Add(new MailboxAddress("La Bodeguita", config["SMTPUser"]));
+                message.Subject = "Envío de nueva contraseña";
+                message.Body = new TextPart("html")
+                {
+                    Text = $@"<h1>Hola</h1>
+                            <p>{nombre},TU NUEVA CLAVE ES: <strong>{nuevaClave}</strong></p>"
+                };
+
+                using var client = new SmtpClient();
+                await client.ConnectAsync("smtp.gmail.com", 465, MailKit.Security.SecureSocketOptions.SslOnConnect);
+                await client.AuthenticateAsync(config["SMTPUser"], config["SMTPPass"]);
+                await client.SendAsync(message);
+                await client.DisconnectAsync(true);
+
+                var htmlEnviado = @"<dialog open>
+                                    <p>Clave Reseteada con éxito. Revisa tu correo electrónico.</p>
+                                    <button onclick='window.close()'>Cerrar ventana</button>
+                                    </dialog>";
+
+                return Content(htmlEnviado, "text/html");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        private string HashearClave(string clave)
+        {
+            
+            if(clave != "" && clave != null)
+            {
+                var claveHasheada = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+                            password: clave,
+                            salt: System.Text.Encoding.ASCII.GetBytes(config["Salt"]),
+                            prf: KeyDerivationPrf.HMACSHA1,
+                            iterationCount: 1000,
+                            numBytesRequested: 256 / 8));
+                return (claveHasheada);
+            }
+            return "error en Hasheo";
+            
+            
+        }
+
     }
 }

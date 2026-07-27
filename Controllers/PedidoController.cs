@@ -92,7 +92,8 @@ namespace Api_Labodeguita.net.Controllers
                     var listaP = await contexto.Pedido
                         .Include(x => x.Cliente)
                         .Include(x => x.Estado)
-                        .Where(x => x.Fecha == DateTime.Today && (x.EstadoId == 1 || x.EstadoId == 2)).ToListAsync();
+                        .Where(x => x.Fecha == DateTime.Today && (x.EstadoId == 1 || x.EstadoId == 2))
+                        .OrderByDescending(x =>x.Id).ToListAsync();
 
                     foreach (Pedido p in listaP)
                             {
