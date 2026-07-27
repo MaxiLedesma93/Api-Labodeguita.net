@@ -30,6 +30,7 @@ namespace Api_Labodeguita.net.Controllers
 
         #region EndPoints
         [HttpGet("{id}")]
+        [Authorize]
         //localhost/Estado/${id}
         public async Task<ActionResult> GetEstado(int id)
         {
@@ -45,6 +46,7 @@ namespace Api_Labodeguita.net.Controllers
         }
         
         [HttpGet("listarEstados")]
+        [Authorize]
         //localhost/listarEstados
         public async Task<ActionResult> listarEstados()
         {

@@ -30,6 +30,7 @@ namespace Api_Labodeguita.net.Controllers
 
         #region EndPoints
         [HttpGet("{id}")]
+        [Authorize]
         //localhost/detalle/${id}
         public async Task<ActionResult> GetDetalle(int id)
         {
@@ -44,6 +45,7 @@ namespace Api_Labodeguita.net.Controllers
             }
         }
         [HttpGet("obtenerdetalleporpedido/{pedidoId}")]
+        [Authorize]
         //localhost/detalle/${id}
         public async Task<ActionResult> GetDetallePorPedido(int pedidoId)
         {
@@ -69,6 +71,7 @@ namespace Api_Labodeguita.net.Controllers
         }
         
         [HttpPost("GuardarDetalle")]
+        [Authorize(Policy = "Cliente")]
         public async Task<IActionResult> GuardarDetalle([FromBody] Detalle detalle)
 
         {
@@ -100,6 +103,7 @@ namespace Api_Labodeguita.net.Controllers
         }
         
         [HttpDelete("borrardetalle/{id}")]
+        [Authorize(Policy = "Cliente")]
         //localhost/detalle/${id}
         public async Task<ActionResult> BorrarDetalle(int id)
         {

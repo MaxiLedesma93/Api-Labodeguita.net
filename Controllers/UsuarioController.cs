@@ -59,6 +59,7 @@ namespace Api_Labodeguita.net.Controllers
         }
 
         [HttpGet("perfil")]
+        [Authorize]
         public async Task<ActionResult<Usuario>> Get()
         {
             try
@@ -264,9 +265,10 @@ namespace Api_Labodeguita.net.Controllers
                 message.Subject = "Link para resetear contraseña";
                 message.Body = new TextPart("html")
                 {
-                    Text = $@"<h1>Hola, {entidad.Nombre}</h1>
+                    Text = $@"<h1>Estimado/a: {entidad.Nombre} {entidad.Apellido}</h1>
                             <p>Haz <a href='{dominio}'>click aquí</a> para resetear tu contraseña.</p>
-                            <p>Este enlace expira en 15 minutos.</p>"
+                            <p>Este enlace expira en 15 minutos.</p>
+                            <p>Atentamente, equipo de soporte técnico de La Bodeguita.</p>"
                 };
                
 
@@ -288,7 +290,7 @@ namespace Api_Labodeguita.net.Controllers
 
         // GET api/<controller>/token
         [HttpGet("token")]
-        [Authorize] // Asegúrate de incluir el atributo explícito de autorización
+        [Authorize]
         public async Task<IActionResult> Token()
         {
             try
@@ -323,8 +325,10 @@ namespace Api_Labodeguita.net.Controllers
                 message.Subject = "Envío de nueva contraseña";
                 message.Body = new TextPart("html")
                 {
-                    Text = $@"<h1>Hola</h1>
-                            <p>{nombre},TU NUEVA CLAVE ES: <strong>{nuevaClave}</strong></p>"
+                    Text = $@"<h1>Estimado:/a: {nombre}</h1>
+                            <p>Has sido dado de alta en la aplicacion móvil de: La Bodeguita, casa de comida casera.</p>
+                            <p>TU NUEVA CLAVE ES: <strong>{nuevaClave}</strong></p>
+                            <p>Atentamente, equipo de soporte técnico de La Bodeguita</p>"
                 };
 
                 using var client = new SmtpClient();
@@ -334,7 +338,7 @@ namespace Api_Labodeguita.net.Controllers
                 await client.DisconnectAsync(true);
 
                 var htmlEnviado = @"<dialog open>
-                                    <p>Clave Reseteada con éxito. Revisa tu correo electrónico.</p>
+                                    <p>Clave Reseteada exitosamente!! Revisa tu casilla de correo.</p>
                                     <button onclick='window.close()'>Cerrar ventana</button>
                                     </dialog>";
 
