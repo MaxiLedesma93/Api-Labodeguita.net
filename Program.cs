@@ -7,7 +7,7 @@ using System.Security.Claims;
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
-// Add services to the container.
+
 builder.Services.AddControllers();
 builder.WebHost.UseUrls("http://localhost:5000", "http://localhost:5001", "http://*:5000", "http://*:5001");
 

@@ -152,6 +152,28 @@ namespace Api_Labodeguita.net.Controllers
             }
         }
         #endregion
+        [HttpPatch("bajaProducto/{id}")]
+        [Authorize(Policy = "Recepcionista")]
+        
+        public async Task<ActionResult> bajaProducto(int id)
+        {
+            try
+            {
+                var producto = await contexto.Producto.SingleOrDefaultAsync(x => x.Id == id);
+                if (producto != null)
+                {
+                    producto.Estado = false;
+                    contexto.Producto.Update(producto);
+                    await contexto.SaveChangesAsync();
+                }
+                return producto != null ? Ok() : NotFound();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message.ToString());
+
+            }
+        }
 
 
         //funcion asincrona para guardar la imagen y modificarle tamaño.

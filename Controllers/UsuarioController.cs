@@ -242,7 +242,8 @@ namespace Api_Labodeguita.net.Controllers
                 {
                     new Claim(ClaimTypes.Name, entidad.Email),
                     new Claim("FullName", $"{entidad.Nombre} {entidad.Apellido}"),
-                    new Claim(ClaimTypes.Role, "Propietario"),
+                    new Claim(ClaimTypes.Role, "Recepcionista"),
+                    new Claim(ClaimTypes.Role, "Cliente"),
                     new Claim("Purpose", "PasswordReset") // Claim de seguridad adicional
                 };
 
