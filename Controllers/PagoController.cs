@@ -20,6 +20,7 @@ namespace Api_Labodeguita.net.Controllers
         private readonly DataContext contexto;
         public IConfiguration config { get; }
         public IWebHostEnvironment environment { get; }
+        public const int ESTADO_TERMINADO = 5;
 
         public PagoController(DataContext context, IConfiguration config,IWebHostEnvironment environment)
         {
@@ -75,7 +76,7 @@ namespace Api_Labodeguita.net.Controllers
                 DateTime fechaConvertida = DateTime.ParseExact(Fecha, formato, CultureInfo.InvariantCulture);
                 Console.WriteLine(fechaConvertida);
                 var listaPedidos = await contexto.Pedido
-                .Where(x => x.Fecha == fechaConvertida && x.EstadoId == 1).ToListAsync();
+                .Where(x => x.Fecha == fechaConvertida && x.EstadoId == ESTADO_TERMINADO).ToListAsync();
                 var listaEnviar = new List<Pago>();
                 foreach (Pedido pedido in listaPedidos) {
                     var listaPagosxPedido = await contexto.Pago.Where(x => x.PedidoId == pedido.Id).ToListAsync();

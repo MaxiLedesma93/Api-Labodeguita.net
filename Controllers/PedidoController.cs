@@ -20,6 +20,14 @@ namespace Api_Labodeguita.net.Controllers
         private readonly DataContext contexto;
         public IConfiguration config { get; }
         public IWebHostEnvironment environment { get; }
+        public const int ESTADOS_RECIBIDO_PREPARACION = -1;
+        public const int ESTADO_RECIBIDO = 1;
+        public const int ESTADO_PREPARACION = 2;
+        public const int ESTADO_CANCELADO = 4;
+        public const int ESTADO_TERMINADO = 5;
+         public const int CANTIDAD_DE_PEDIDOS = 10;
+
+       
 
         public PedidoController(DataContext context, IConfiguration config,IWebHostEnvironment environment)
         {
@@ -61,7 +69,7 @@ namespace Api_Labodeguita.net.Controllers
         {
             try
             {
-                if(idEstado != -1)
+                if(idEstado != ESTADOS_RECIBIDO_PREPARACION)
                 {
                     var listaP = await contexto.Pedido
                         .Include(x => x.Cliente)
@@ -92,7 +100,7 @@ namespace Api_Labodeguita.net.Controllers
                     var listaP = await contexto.Pedido
                         .Include(x => x.Cliente)
                         .Include(x => x.Estado)
-                        .Where(x => x.Fecha == DateTime.Today && (x.EstadoId == 1 || x.EstadoId == 2))
+                        .Where(x => x.Fecha == DateTime.Today && (x.EstadoId == ESTADO_RECIBIDO || x.EstadoId == ESTADO_PREPARACION))
                         .OrderByDescending(x =>x.Id).ToListAsync();
 
                     foreach (Pedido p in listaP)
@@ -138,7 +146,7 @@ namespace Api_Labodeguita.net.Controllers
                     .Where(x => x.Cliente.Email == cliente)
                     .OrderByDescending(x => x.Id)
                     //traemos los ultimos 10 pedidos del cliente.
-                    .Take<Pedido>(10)
+                    .Take<Pedido>(CANTIDAD_DE_PEDIDOS)
                     .ToListAsync();
 
                 foreach (Pedido p in listaP)
@@ -213,7 +221,7 @@ namespace Api_Labodeguita.net.Controllers
                 var listaP = await contexto.Pedido
                 .Include(x => x.Cliente)
                 .Include(x => x.Estado)
-                .Where(x => x.Fecha == Fecha && x.EstadoId == 5).ToListAsync();
+                .Where(x => x.Fecha == Fecha && x.EstadoId == ESTADO_TERMINADO).ToListAsync();
 
                 foreach (Pedido p in listaP)
                 {
@@ -248,7 +256,7 @@ namespace Api_Labodeguita.net.Controllers
                 var cliente = await contexto.Usuario.SingleOrDefaultAsync(x => x.Email == emailUsuario);
                 //asignamos el Id del cliente con el id del usuario logueado/autenticado.
                 pedido.ClienteId = cliente.Id;
-                pedido.EstadoId = 1;
+                pedido.EstadoId = ESTADO_RECIBIDO;
                 pedido.ImporteTotal= 0.0;
                 
                 
@@ -301,7 +309,7 @@ namespace Api_Labodeguita.net.Controllers
                
 
                 //validar q el usuario sea el mismo que edita.
-                if (pedidoBD.ClienteId == cliente.Id && pedidoBD.EstadoId == 1)
+                if (pedidoBD.ClienteId == cliente.Id && pedidoBD.EstadoId == ESTADO_RECIBIDO)
                 {
                     
                     pedidoBD.Delivery = p.Delivery;
@@ -357,7 +365,7 @@ namespace Api_Labodeguita.net.Controllers
                 var usuario = await contexto.Usuario.SingleOrDefaultAsync(x => x.Email == email);
                 if (pedido != null && pedido.ClienteId == usuario.Id )
                 {
-                    pedido.EstadoId = 4;
+                    pedido.EstadoId = ESTADO_CANCELADO;
                     contexto.Pedido.Update(pedido);
                     await contexto.SaveChangesAsync();
                     return Ok();

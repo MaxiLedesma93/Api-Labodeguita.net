@@ -19,6 +19,7 @@ namespace Api_Labodeguita.net.Controllers
         private readonly DataContext contexto;
         public IConfiguration config { get; }
         public IWebHostEnvironment environment { get; }
+        public const int ESTADO_RECIBIDO = 1;
 
         public DetalleController(DataContext context, IConfiguration config,IWebHostEnvironment environment)
         {
@@ -59,7 +60,7 @@ namespace Api_Labodeguita.net.Controllers
                     x.Cantidad,
                     x.PedidoId,
                     x.ProductoId,
-                    x.Producto //tratamos de enviar el producto.
+                    x.Producto 
                 })
                 .ToListAsync();
                 return detalle != null ? Ok(detalle) : NotFound();
@@ -84,7 +85,7 @@ namespace Api_Labodeguita.net.Controllers
                 
                 //Validamos que el pedido al que pertenece el detalle este en estado "Recibido" id = 1;
                 //Validamos que el usuario que edita el pedido sea el mismo que creo el pedido.
-                if (pedido.EstadoId == 1 && pedido.ClienteId == cliente.Id)
+                if (pedido.EstadoId == ESTADO_RECIBIDO && pedido.ClienteId == cliente.Id)
                 {
                     contexto.Add(detalle);
                     await contexto.SaveChangesAsync();
@@ -115,7 +116,7 @@ namespace Api_Labodeguita.net.Controllers
                 if(detalle != null)
                 {
                     var pedido = await contexto.Pedido.SingleOrDefaultAsync(x => x.Id == detalle.PedidoId);
-                    if(pedido.EstadoId == 1 && pedido.ClienteId == cliente.Id)
+                    if(pedido.EstadoId == ESTADO_RECIBIDO && pedido.ClienteId == cliente.Id)
                     {
                         contexto.Detalle.Remove(detalle);
                         await contexto.SaveChangesAsync();

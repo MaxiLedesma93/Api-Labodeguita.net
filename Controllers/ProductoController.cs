@@ -73,17 +73,8 @@ namespace Api_Labodeguita.net.Controllers
             }
             catch (Exception ex)
             {
-                  // 3. ¡SI ALGO FALLA, LA EXCEPCIÓN SE CAPTURA AQUÍ!
-                    // En lugar de crashear, el servidor ahora hará dos cosas:
-
-                    // a. Registrar el error en la consola del servidor para que tú puedas verlo.
-                    Console.WriteLine($"Error al listar productos: {ex.Message}");
-                    // (En un proyecto real, usarías un sistema de logging como ILogger)
-
-                    // b. Devolver una respuesta de error 500 limpia a la app de Android.
-                    // Esto NO causará 'unexpected end of stream'. Retrofit lo interpretará
-                    // como un error HTTP y podrás manejarlo en el callback onFailure.
-                    return StatusCode(500, $"Error interno del servidor: {ex.Message}");
+                  
+                return StatusCode(500, $"Error interno del servidor: {ex.Message}");
             }
         }
 
@@ -95,18 +86,9 @@ namespace Api_Labodeguita.net.Controllers
             try
             {
                 producto.Foto = "Sin foto";
-                 Console.WriteLine("MODEL STATE: " + ModelState.IsValid);
                 
-                    foreach (var kvp in ModelState)
-                    {
-                        foreach (var error in kvp.Value.Errors)
-                        {
-                            Console.WriteLine($"ModelState Error - Campo: {kvp.Key} | Error: {error.ErrorMessage}");
-                        }
-                    } 
             
-                    //aca deberiamos agregar el idTipo al producto, de acuerdo a la descTipo que viene de
-                    // la vista. buscandola en la tabla de tipos por descripcion.
+                   
                    var tipo = await contexto.Tipo.SingleOrDefaultAsync(x => x.Descripcion == producto.TipoProducto);
                     if (tipo!= null)
                     {
